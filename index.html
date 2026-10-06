@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIBUTA CESC Jornalismo | Informação em Tempo Real</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0056A0',     /* Cor Primária 1 */
+                            blue: '#0056A0',
+                            light: '#40a9FF',    /* Cor Secundária 2 */
+                            green: '#7AC143',    /* Cor Destaque/Sucesso 3 */
+                            accent: '#7AC143'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar and smooth animations */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0056A0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #40a9FF;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 35s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+
+        .gradient-brand {
+            background: linear-gradient(135deg, #0056A0 0%, #003a6d 100%);
+        }
+        
+        .gradient-accent {
+            background: linear-gradient(135deg, #40a9FF 0%, #0056A0 100%);
+        }
+
+        .badge-green {
+            background-color: #7AC143;
+            color: #ffffff;
+        }
+
+        .card-hover-effect {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 86, 160, 0.18);
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 18, 38, 0.75);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-light selection:text-white min-h-screen flex flex-col">
+
+    <!-- TOP UTILITY & MARKET TICKER BAR -->
+    <div class="bg-slate-900 text-slate-200 text-xs border-b border-slate-800 py-1.5 px-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            
+            <!-- Live Date & Clock -->
+            <div class="flex items-center space-x-3 font-medium text-slate-400">
+                <span id="current-date" class="text-slate-300"></span>
+                <span class="text-slate-600">|</span>
+                <span class="inline-flex items-center text-brand-green font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-brand-green animate-ping mr-1.5"></span> AO VIVO
+                </span>
+            </div>
+
+            <!-- Financial Ticker Ticker (Market indicators) -->
+            <div class="flex-1 overflow-hidden mx-4 hidden md:block">
+                <div class="flex items-center space-x-6 text-xs whitespace-nowrap">
+                    <!-- Ibovespa -->
+                    <a href="https://www.b3.com.br" target="_blank" rel="noopener" class="flex items-center space-x-1.5 hover:text-brand-light transition" title="Ver cotações na B3">
+                        <span class="font-bold text-slate-300">IBOVESPA:</span>
+                        <span class="font-semibold text-slate-100">128.450 pts</span>
+                        <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-caret-up"></i> +0.85%</span>
+                    </a>
+                    <span class="text-slate-700">•</span>
+                    <!-- Dólar -->
+                    <a href="https://www.bcb.gov.br" target="_blank" rel="noopener" class="flex items-center space-x-1.5 hover:text-brand-light transition" title="Dados Oficiais Banco Central">
+                        <span class="font-bold text-slate-300">DÓLAR (USD):</span>
+                        <span class="font-semibold text-slate-100">R$ 5,42</span>
+                        <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-caret-down"></i> -0.32%</span>
+                    </a>
+                    <span class="text-slate-700">•</span>
+                    <!-- Euro -->
+                    <a href="https://www.bcb.gov.br" target="_blank" rel="noopener" class="flex items-center space-x-1.5 hover:text-brand-light transition">
+                        <span class="font-bold text-slate-300">EURO (EUR):</span>
+                        <span class="font-semibold text-slate-100">R$ 5,91</span>
+                        <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-caret-up"></i> +0.12%</span>
+                    </a>
+                    <span class="text-slate-700">•</span>
+                    <!-- Selic -->
+                    <a href="https://www.bcb.gov.br/controleinflacao/taxaselic" target="_blank" rel="noopener" class="flex items-center space-x-1.5 hover:text-brand-light transition">
+                        <span class="font-bold text-slate-300">TAXA SELIC:</span>
+                        <span class="font-semibold text-brand-light">10,75% a.a.</span>
+                    </a>
+                    <span class="text-slate-700">•</span>
+                    <!-- IPCA Inflação -->
+                    <a href="https://www.ibge.gov.br/explica/inflacao.php" target="_blank" rel="noopener" class="flex items-center space-x-1.5 hover:text-brand-light transition">
+                        <span class="font-bold text-slate-300">IPCA (12m):</span>
+                        <span class="font-semibold text-amber-400">4,12%</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Utility links -->
+            <div class="flex items-center space-x-4 font-medium">
+                <a href="#financeiro" class="text-brand-light hover:underline font-semibold flex items-center">
+                    <i class="fa-solid fa-chart-line mr-1"></i> Central do Investidor
+                </a>
+                <button onclick="toggleFontSize()" class="text-slate-400 hover:text-white px-1" title="Aumentar/Diminuir fonte">
+                    <i class="fa-solid fa-font"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN SITE HEADER -->
+    <header class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo & Slogan -->
+            <div class="flex items-center space-x-3">
+                <a href="#" class="flex items-center space-x-3 group">
+                    <div class="w-12 h-12 rounded-xl gradient-brand flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-900/20 group-hover:scale-105 transition">
+                        N
+                    </div>
+                    <div>
+                        <div class="flex items-center">
+                            <span class="text-3xl font-black tracking-tight text-slate-900">TRIBUITA CESC</span>
+                            <span class="text-3xl font-black tracking-tight text-brand-light ml-1">NEWS</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-green ml-1.5"></span>
+                        </div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Jornalismo Independente & Inteligência Financeira</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Center Search Bar -->
+            <div class="w-full md:w-96 relative">
+                <input type="text" id="site-search" onkeyup="filterArticlesBySearch()" placeholder="Pesquisar notícias, finanças, cursos..." class="w-full pl-10 pr-4 py-2.5 rounded-full border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition shadow-inner bg-slate-50">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+            </div>
+
+            <!-- Weather & Status Widget -->
+            <div class="hidden lg:flex items-center space-x-3 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200">
+                <i class="fa-solid fa-sun-cloud text-amber-500 text-2xl"></i>
+                <div class="text-xs">
+                    <p class="font-bold text-slate-800">Canoinhas / SP • 24°C</p>
+                    <p class="text-slate-500">Parcialmente Ensolarado</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MAIN NAVIGATION MENU -->
+        <nav class="bg-brand-dark text-white shadow-inner">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between overflow-x-auto scrollbar-none py-1">
+                    <ul class="flex space-x-1 sm:space-x-2 text-sm font-semibold whitespace-nowrap">
+                        <li>
+                            <a href="#capa" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-white bg-white/15">
+                                <i class="fa-solid fa-house text-brand-light mr-1.5"></i>Início
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#noticias" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-regular fa-newspaper mr-1.5 text-brand-light"></i>Notícias
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#financeiro" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-solid fa-chart-line mr-1.5 text-brand-green"></i>Finanças & Mercado
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#entretenimento" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-solid fa-film mr-1.5 text-brand-light"></i>Entretenimento
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#curiosidades" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-solid fa-lightbulb mr-1.5 text-amber-300"></i>Curiosidades
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#cursos" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-solid fa-graduation-cap mr-1.5 text-brand-green"></i>Cursos & Vagas
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#tecnologia" class="px-4 py-3 rounded-lg block hover:bg-white/10 transition text-slate-100">
+                                <i class="fa-solid fa-microchip mr-1.5 text-brand-light"></i>Tecnologia
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Urgent Live Badge -->
+                    <div class="hidden xl:flex items-center space-x-2 pl-4">
+                        <span class="bg-red-600 text-white text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider animate-pulse">
+                            Urgente
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- BREAKING NEWS BAR -->
+    <div class="bg-red-900/10 border-b border-red-200/60 py-2.5 px-4 text-xs font-semibold text-slate-800">
+        <div class="max-w-7xl mx-auto flex items-center space-x-3">
+            <span class="bg-red-600 text-white px-2.5 py-1 rounded font-extrabold uppercase text-[10px] tracking-widest shrink-0">
+                Última Hora
+            </span>
+            <div class="overflow-hidden relative w-full">
+                <div class="animate-marquee font-medium text-slate-800 space-x-8">
+                    <span><strong class="text-brand-dark">08:25</strong> Banco Central divulga novo relatório Focus com projeções de inflação e PIB para 2026.</span>
+                    <span><strong class="text-brand-dark">08:10</strong> Mercados globais operam em alta no pregão desta manhã com balanços de tecnologia.</span>
+                    <span><strong class="text-brand-dark">07:50</strong> Inscrições abertas para 50 mil bolsas gratuitas em cursos de tecnologia e inteligência artificial.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PAGE CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+        <!-- CAPA / HERO SECTION -->
+        <section id="capa" class="mb-12">
+            <!-- Section Header with Timestamp -->
+            <div class="flex items-center justify-between border-b-2 border-brand-dark pb-2 mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-brand-dark"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">DESTAQUES DA CAPA</h2>
+                </div>
+                <div class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    <i class="fa-regular fa-clock text-brand-light mr-1"></i> Última Atualização: <span class="font-bold text-slate-700">Hoje às 08:30</span>
+                </div>
+            </div>
+
+            <!-- Hero Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Main Feature Article (8 cols) -->
+                <article class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between group">
+                    <div class="relative overflow-hidden aspect-video">
+                        <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80" alt="Mercado Financeiro e Inovação" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent"></div>
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="bg-brand-dark text-white font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                                Economia & Tecnologia
+                            </span>
+                            <span class="bg-brand-green text-white font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                                Análise Especial
+                            </span>
+                        </div>
+                        <div class="absolute bottom-6 left-6 right-6 text-white">
+                            <span class="text-xs text-brand-light font-semibold mb-2 block">
+                                <i class="fa-regular fa-calendar mr-1"></i> 06 de Outubro, 2026 • 8 min de leitura
+                            </span>
+                            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight mb-3 text-white hover:text-brand-light transition cursor-pointer" onclick="openArticleModal(1)">
+                                Novo Pacote Econômico e Transição Tecnológica Prometem Impulsionar PIB Nacional em 2026
+                            </h1>
+                            <p class="text-slate-200 text-sm sm:text-base line-clamp-2 mb-4 font-normal">
+                                Especialistas apontam que incentivos ao setor de energia limpa, inteligência artificial e reformas de crédito podem acelerar a criação de empregos qualificados no país.
+                            </p>
+                            <div class="flex items-center justify-between pt-2 border-t border-white/20">
+                                <div class="flex items-center space-x-2 text-xs text-slate-300">
+                                    <span class="font-bold text-white">Por Carlos Eduardo Silva</span>
+                                    <span>•</span>
+                                    <span>Nexus Brasília</span>
+                                </div>
+                                <button onclick="openArticleModal(1)" class="bg-brand-light hover:bg-brand-dark text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow flex items-center">
+                                    Ler Matéria Completa <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Side Top Stories Grid (4 cols) -->
+                <div class="lg:col-span-4 flex flex-col space-y-4">
+                    
+                    <!-- Side Card 1 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-brand-dark uppercase tracking-wider">Inovação</span>
+                                <span class="text-[11px] text-slate-400 font-medium">Há 15 min</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light transition cursor-pointer" onclick="openArticleModal(2)">
+                                Avanço da IA em Diagnósticos Médicos Atinge Marca Histórica em Hospitais do Brasil
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 line-clamp-2">
+                                Ferramentas preditivas reduzem em até 40% o tempo de análise de exames complexos em redes de saúde pública.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-500 font-medium"><i class="fa-solid fa-eye text-brand-light mr-1"></i> 1.2k leituras</span>
+                            <button onclick="openArticleModal(2)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Leia mais <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Side Card 2 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-brand-green uppercase tracking-wider">Sustentabilidade</span>
+                                <span class="text-[11px] text-slate-400 font-medium">Há 42 min</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light transition cursor-pointer" onclick="openArticleModal(3)">
+                                Brasil Bate Recorde de Geração de Energia Eólica e Solar no Terceiro Trimestre
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 line-clamp-2">
+                                Matriz renovável atinge 89% do consumo nacional, atraindo investimentos internacionais bilionários.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-500 font-medium"><i class="fa-solid fa-eye text-brand-light mr-1"></i> 940 leituras</span>
+                            <button onclick="openArticleModal(3)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Leia mais <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Side Card 3 -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-purple-600 uppercase tracking-wider">Educação</span>
+                                <span class="text-[11px] text-slate-400 font-medium">Há 1 hora</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light transition cursor-pointer" onclick="openArticleModal(4)">
+                                Plataformas Gratuitas de Capacitação em TI Registram Recorde de Candidatos
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 line-clamp-2">
+                                Cursos práticos com mentoria de mercado atraem jovens e profissionais em transição de carreira.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-500 font-medium"><i class="fa-solid fa-eye text-brand-light mr-1"></i> 2.1k leituras</span>
+                            <button onclick="openArticleModal(4)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Leia mais <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEÇÃO FINANCEIRA COMPLETA (INFORMAÇÕES FINANCEIRAS) -->
+        <section id="financeiro" class="mb-14 scroll-mt-20">
+            
+            <!-- Section Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-green pb-3 mb-6 gap-2">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-brand-green"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">MERCADO & FINANÇAS</h2>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">
+                        Dados de Fontes Oficiais
+                    </span>
+                </div>
+                <div class="text-xs font-semibold text-slate-500 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <i class="fa-solid fa-rotate text-brand-green mr-1"></i> Atualizado às <span class="font-bold text-slate-800">08:30:00 - B3 & Banco Central</span>
+                </div>
+            </div>
+
+            <!-- Financial Live Indicators Cards Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                
+                <!-- Card Ibovespa -->
+                <a href="https://www.b3.com.br/pt_br/" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>IBOVESPA</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-slate-900">128.450</div>
+                    <div class="text-xs font-bold text-emerald-600 flex items-center mt-1">
+                        <i class="fa-solid fa-caret-up mr-1"></i> +0.85% <span class="text-slate-400 font-normal ml-1">hoje</span>
+                    </div>
+                </a>
+
+                <!-- Card Dolar -->
+                <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>DÓLAR COMERCIAL</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-slate-900">R$ 5,420</div>
+                    <div class="text-xs font-bold text-emerald-600 flex items-center mt-1">
+                        <i class="fa-solid fa-caret-down mr-1"></i> -0.32% <span class="text-slate-400 font-normal ml-1">PTAX</span>
+                    </div>
+                </a>
+
+                <!-- Card Euro -->
+                <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>EURO</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-slate-900">R$ 5,912</div>
+                    <div class="text-xs font-bold text-emerald-600 flex items-center mt-1">
+                        <i class="fa-solid fa-caret-up mr-1"></i> +0.12%
+                    </div>
+                </a>
+
+                <!-- Card Taxa Selic -->
+                <a href="https://www.bcb.gov.br/controleinflacao/taxaselic" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>TAXA SELIC</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-brand-dark">10,75%</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-1">
+                        Meta COPOM
+                    </div>
+                </a>
+
+                <!-- Card Inflação IPCA -->
+                <a href="https://www.ibge.gov.br/explica/inflacao.php" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>INFLAÇÃO IPCA</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-slate-900">4,12%</div>
+                    <div class="text-xs font-semibold text-amber-600 mt-1">
+                        Acumulado 12 Meses
+                    </div>
+                </a>
+
+                <!-- Card Bitcoin -->
+                <a href="https://coinmarketcap.com" target="_blank" rel="noopener" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-brand-light transition text-left group">
+                    <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+                        <span>BITCOIN (BTC)</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] group-hover:text-brand-light"></i>
+                    </div>
+                    <div class="text-lg font-black text-slate-900">R$ 365.200</div>
+                    <div class="text-xs font-bold text-emerald-600 flex items-center mt-1">
+                        <i class="fa-solid fa-caret-up mr-1"></i> +2.10%
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Trusted Financial Portals Quick Link Hub -->
+            <div class="bg-slate-900 text-white p-5 rounded-2xl mb-8 shadow-md">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg bg-brand-green flex items-center justify-center text-white font-bold text-xl">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-base text-white">Fontes Financeiras Verificadas</h3>
+                            <p class="text-xs text-slate-300">Acesse relatórios e cotações direto dos órgãos e portais oficiais:</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="https://www.bcb.gov.br/" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-brand-dark px-3.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white transition border border-slate-700 flex items-center">
+                            <i class="fa-solid fa-landmark mr-1.5 text-brand-green"></i> Banco Central
+                        </a>
+                        <a href="https://www.b3.com.br" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-brand-dark px-3.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white transition border border-slate-700 flex items-center">
+                            <i class="fa-solid fa-chart-pie mr-1.5 text-brand-light"></i> B3 Brasil
+                        </a>
+                        <a href="https://www.ibge.gov.br" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-brand-dark px-3.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white transition border border-slate-700 flex items-center">
+                            <i class="fa-solid fa-chart-line mr-1.5 text-amber-400"></i> IBGE
+                        </a>
+                        <a href="https://valor.globo.com/" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-brand-dark px-3.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white transition border border-slate-700 flex items-center">
+                            <i class="fa-solid fa-newspaper mr-1.5 text-brand-light"></i> Valor Econômico
+                        </a>
+                        <a href="https://www.infomoney.com.br" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-brand-dark px-3.5 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white transition border border-slate-700 flex items-center">
+                            <i class="fa-solid fa-coins mr-1.5 text-brand-green"></i> InfoMoney
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Simulator & Currency Converter Tool -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                
+                <!-- Investment Simulator -->
+                <div class="lg:col-span-6 border-b lg:border-b-0 lg:border-r border-slate-200 pb-6 lg:pb-0 lg:pr-6">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-calculator text-brand-dark text-xl"></i>
+                        <h3 class="font-extrabold text-slate-900 text-lg">Simulador de Rendimento Selic vs Poupança</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-4">Simule quanto rende o seu dinheiro investido a 100% do CDI em relação à poupança tradicional:</p>
+
+                    <div class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Valor Inicial do Investimento (R$):</label>
+                            <input type="number" id="calc-amount" value="10000" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-dark focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Prazo do Investimento:</label>
+                            <select id="calc-months" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-dark focus:outline-none">
+                                <option value="6">6 Meses</option>
+                                <option value="12" selected>12 Meses (1 Ano)</option>
+                                <option value="24">24 Meses (2 Anos)</option>
+                                <option value="36">36 Meses (3 Anos)</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateInvestment()" class="w-full bg-brand-dark hover:bg-brand-light text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Calcular Rendimento
+                        </button>
+                    </div>
+
+                    <!-- Calculation Output -->
+                    <div id="calc-result" class="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-emerald-100">
+                                <span class="text-[11px] font-bold text-slate-500 block">Rendimento CDI (Selic)</span>
+                                <span id="res-cdi" class="text-base font-black text-brand-green">R$ 11.075,00</span>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-emerald-100">
+                                <span class="text-[11px] font-bold text-slate-500 block">Poupança Tradicional</span>
+                                <span id="res-poupanca" class="text-base font-black text-slate-700">R$ 10.617,00</span>
+                            </div>
+                        </div>
+                        <p id="res-diff" class="text-xs text-center font-bold text-emerald-800 mt-2">
+                            Ganho extra de R$ 458,00 no Tesouro Selic / CDB!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Currency Converter -->
+                <div class="lg:col-span-6">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fa-solid fa-right-left text-brand-green text-xl"></i>
+                        <h3 class="font-extrabold text-slate-900 text-lg">Conversor Rápido de Moedas</h3>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-4">Calcule a conversão direta com base na cotação comercial do dia:</p>
+
+                    <div class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Valor:</label>
+                                <input type="number" id="curr-amount" value="100" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-green focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">De:</label>
+                                <select id="curr-from" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-green focus:outline-none">
+                                    <option value="USD">Dólar Americano (USD)</option>
+                                    <option value="EUR">Euro (EUR)</option>
+                                    <option value="BRL">Real Brasileiro (BRL)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Para:</label>
+                            <select id="curr-to" class="w-full px-3 py-2 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-2 focus:ring-brand-green focus:outline-none">
+                                <option value="BRL" selected>Real Brasileiro (BRL)</option>
+                                <option value="USD">Dólar Americano (USD)</option>
+                                <option value="EUR">Euro (EUR)</option>
+                            </select>
+                        </div>
+
+                        <button onclick="convertCurrency()" class="w-full bg-brand-green hover:bg-emerald-600 text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center">
+                            <i class="fa-solid fa-calculator mr-2"></i> Convert Moeda
+                        </button>
+
+                        <div class="p-4 bg-slate-100 rounded-xl text-center border border-slate-200">
+                            <span class="text-xs text-slate-500 font-medium block">Resultado estimado:</span>
+                            <span id="curr-result-text" class="text-2xl font-black text-slate-900">R$ 542,00</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE NOTÍCIAS GERAIS -->
+        <section id="noticias" class="mb-14 scroll-mt-20">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-dark pb-3 mb-6 gap-3">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-brand-dark"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">ÚLTIMAS NOTÍCIAS</h2>
+                </div>
+                <div class="flex items-center space-x-2 overflow-x-auto text-xs">
+                    <button onclick="filterCategory('todas')" class="cat-btn bg-brand-dark text-white px-3 py-1.5 rounded-lg font-bold">Todas</button>
+                    <button onclick="filterCategory('brasil')" class="cat-btn bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-bold">Brasil</button>
+                    <button onclick="filterCategory('mundo')" class="cat-btn bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-bold">Mundo</button>
+                    <button onclick="filterCategory('politica')" class="cat-btn bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-bold">Política</button>
+                </div>
+            </div>
+
+            <div class="text-xs font-semibold text-slate-500 mb-4 flex items-center">
+                <i class="fa-regular fa-clock text-brand-light mr-1"></i> Seção Notícias - Última Atualização: <span class="font-bold text-slate-800 ml-1"> Há 5 minutos</span>
+            </div>
+
+            <!-- News Grid -->
+            <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- News Card 1 -->
+                <div class="news-item brasil bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-video overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=80" alt="Notícia Brasil" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-brand-dark text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md uppercase">Brasil</span>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[11px] text-slate-400 font-semibold block mb-1"><i class="fa-regular fa-clock mr-1"></i> Hoje às 08:15</span>
+                            <h3 class="font-bold text-slate-900 text-lg leading-snug hover:text-brand-light transition cursor-pointer mb-2" onclick="openArticleModal(5)">
+                                Governo Anuncia Expansão de Infraestrutura Portuária e Ferroviária
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-3">
+                                Com investimentos previstos de R$ 45 bilhões, novas concessões prometem reduzir em até 20% os custos logísticos de escoamento agrícola.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5 pt-0 flex items-center justify-between border-t border-slate-100 mt-2 pt-3">
+                        <span class="text-[11px] font-bold text-slate-500">Por Marina Rocha</span>
+                        <button onclick="openArticleModal(5)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Ler matéria <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- News Card 2 -->
+                <div class="news-item mundo bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-video overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=600&q=80" alt="Notícia Mundo" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-indigo-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md uppercase">Mundo</span>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[11px] text-slate-400 font-semibold block mb-1"><i class="fa-regular fa-clock mr-1"></i> Hoje às 07:40</span>
+                            <h3 class="font-bold text-slate-900 text-lg leading-snug hover:text-brand-light transition cursor-pointer mb-2" onclick="openArticleModal(6)">
+                                Cúpula Global do Clima Define Novas Metas para Transição Energética
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-3">
+                                Líderes de mais de 80 nações firmam acordo para aceleração do hidrogênio verde e descarbonização industrial até 2030.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5 pt-0 flex items-center justify-between border-t border-slate-100 mt-2 pt-3">
+                        <span class="text-[11px] font-bold text-slate-500">Por Lucas Mendonça</span>
+                        <button onclick="openArticleModal(6)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Ler matéria <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+
+                <!-- News Card 3 -->
+                <div class="news-item politica bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-video overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80" alt="Notícia Política" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-amber-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md uppercase">Política</span>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[11px] text-slate-400 font-semibold block mb-1"><i class="fa-regular fa-clock mr-1"></i> Hoje às 06:55</span>
+                            <h3 class="font-bold text-slate-900 text-lg leading-snug hover:text-brand-light transition cursor-pointer mb-2" onclick="openArticleModal(7)">
+                                Congresso Inicia Votação do Marco Legal da Inteligência Artificial
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-3">
+                                Projeto estabelece diretrizes de transparência, proteção de dados pessoais e regulamentação de algoritmos no país.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5 pt-0 flex items-center justify-between border-t border-slate-100 mt-2 pt-3">
+                        <span class="text-[11px] font-bold text-slate-500">Por Fernanda Lima</span>
+                        <button onclick="openArticleModal(7)" class="text-xs font-bold text-brand-dark hover:text-brand-light">Ler matéria <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE ENTRETENIMENTO -->
+        <section id="entretenimento" class="mb-14 scroll-mt-20">
+            
+            <div class="flex items-center justify-between border-b-2 border-brand-light pb-3 mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-brand-light"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">ENTRETENIMENTO & CULTURA</h2>
+                </div>
+                <div class="text-xs font-semibold text-slate-500 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                    <i class="fa-regular fa-clock text-brand-light mr-1"></i> Última Atualização: <span class="font-bold text-slate-800">Há 22 minutos</span>
+                </div>
+            </div>
+
+            <!-- Entertainment Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Cinema Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-4/3 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80" alt="Cinema" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">Cinema</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light cursor-pointer mb-2" onclick="openArticleModal(8)">
+                                Festival Internacional de Cinema Revela Lista de Filmes Indicados
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-2">
+                                Produções nacionais se destacam na seleção oficial entre mais de 120 obras concorrentes.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="openArticleModal(8)" class="w-full bg-slate-100 hover:bg-brand-light hover:text-white text-slate-700 text-xs font-bold py-2 rounded-lg transition">
+                            Ver Crítica Completa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Streaming Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-4/3 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=500&q=80" alt="Streaming" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">Streaming</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light cursor-pointer mb-2" onclick="openArticleModal(9)">
+                                Séries mais Aclamadas do Mês: O Que Assistir no Fim de Semana
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-2">
+                                Guia completo com lançamentos imperdíveis de suspense, ficção científica e dramas históricos.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="openArticleModal(9)" class="w-full bg-slate-100 hover:bg-brand-light hover:text-white text-slate-700 text-xs font-bold py-2 rounded-lg transition">
+                            Conferir Guia
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Music Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-4/3 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=500&q=80" alt="Música" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">Música</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light cursor-pointer mb-2" onclick="openArticleModal(10)">
+                                Turnê de Grandes Festivais Anuncia Line-up Completo no Brasil
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-2">
+                                Artistas internacionais e novos expoentes da MPB prometem shows históricos em 5 capitais.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="openArticleModal(10)" class="w-full bg-slate-100 hover:bg-brand-light hover:text-white text-slate-700 text-xs font-bold py-2 rounded-lg transition">
+                            Ver Programação
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gaming Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="relative aspect-4/3 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=500&q=80" alt="Games" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">Games & Tech</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-slate-900 text-base leading-snug hover:text-brand-light cursor-pointer mb-2" onclick="openArticleModal(11)">
+                                Mercado de Games no Brasil Cresce 18% e Atrai Estúdios Globais
+                            </h3>
+                            <p class="text-xs text-slate-600 line-clamp-2">
+                                Desenvolvedores locais ganham espaço com jogos narrativos baseados no folclore e na cultura nacional.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <button onclick="openArticleModal(11)" class="w-full bg-slate-100 hover:bg-brand-light hover:text-white text-slate-700 text-xs font-bold py-2 rounded-lg transition">
+                            Leia Mais
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE CURIOSIDADES & CIÊNCIA -->
+        <section id="curiosidades" class="mb-14 scroll-mt-20">
+            
+            <div class="flex items-center justify-between border-b-2 border-amber-500 pb-3 mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-amber-500"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">CURIOSIDADES & CIÊNCIA</h2>
+                </div>
+                <div class="text-xs font-semibold text-slate-500 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    <i class="fa-regular fa-clock text-amber-500 mr-1"></i> Última Atualização: <span class="font-bold text-slate-800">Há 1 hora</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Curiosities Grid (8 cols) -->
+                <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase mb-3 inline-block">Espaço & Astronomia</span>
+                        <h3 class="font-bold text-slate-900 text-base leading-snug mb-2 hover:text-brand-light cursor-pointer" onclick="openArticleModal(12)">
+                            Telescópio Espacial Detecta Atmosfera Rica em Água em Exoplaneta Próximo
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">
+                            Descoberta traz novas pistas sobre a formação de sistemas planetários fora do Sistema Solar.
+                        </p>
+                        <span class="text-[11px] font-semibold text-slate-400"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Curiosidade Científica</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase mb-3 inline-block">História Natural</span>
+                        <h3 class="font-bold text-slate-900 text-base leading-snug mb-2 hover:text-brand-light cursor-pointer" onclick="openArticleModal(13)">
+                            Como as Abelhas Utilizam o Campo Magnético da Terra para se Orientar?
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">
+                            Estudo detalha mecanismo de navegação biológica surpreendente em insetos polinizadores.
+                        </p>
+                        <span class="text-[11px] font-semibold text-slate-400"><i class="fa-solid fa-bug text-amber-500 mr-1"></i> Biologia Humana e Fauna</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase mb-3 inline-block">Misterios do Oceano</span>
+                        <h3 class="font-bold text-slate-900 text-base leading-snug mb-2 hover:text-brand-light cursor-pointer" onclick="openArticleModal(14)">
+                            Apenas 25% do Fundo do Mar foi Mapeado: O Que Há nas Profundezas?
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">
+                            Expedições submarinas continuam descobrindo espécies bioluminescentes e ecossistemas inéditos.
+                        </p>
+                        <span class="text-[11px] font-semibold text-slate-400"><i class="fa-solid fa-water text-blue-500 mr-1"></i> Exploração Oceânica</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-hover-effect">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-1 rounded uppercase mb-3 inline-block">Tecnologia Antiga</span>
+                        <h3 class="font-bold text-slate-900 text-base leading-snug mb-2 hover:text-brand-light cursor-pointer" onclick="openArticleModal(15)">
+                            A Origem do Mecanismo de Anticítera: O Primeiro Computador Analógico
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">
+                            Engenharia grega antiga calculava eclipses e posições astronômicas com precisão incrível.
+                        </p>
+                        <span class="text-[11px] font-semibold text-slate-400"><i class="fa-solid fa-gear text-slate-500 mr-1"></i> Arqueologia</span>
+                    </div>
+
+                </div>
+
+                <!-- Interactive Trivia Quiz Widget (4 cols) -->
+                <div class="lg:col-span-4 bg-gradient-to-br from-amber-500 to-amber-600 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-3">
+                            <i class="fa-solid fa-brain text-2xl text-amber-100"></i>
+                            <h3 class="font-black text-lg">Quiz Rápido do Dia</h3>
+                        </div>
+                        <p class="text-xs text-amber-100 mb-4">Teste seus conhecimentos científicos em 30 segundos!</p>
+                        
+                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 mb-4">
+                            <p class="text-sm font-bold mb-3" id="quiz-question">
+                                Qual é o elemento químico mais abundante no universo?
+                            </p>
+                            <div class="space-y-2 text-xs" id="quiz-options">
+                                <button onclick="answerQuiz(false)" class="w-full text-left bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg font-medium transition">A) Oxigênio</button>
+                                <button onclick="answerQuiz(true)" class="w-full text-left bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg font-medium transition">B) Hidrogênio</button>
+                                <button onclick="answerQuiz(false)" class="w-full text-left bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg font-medium transition">C) Carbono</button>
+                            </div>
+                        </div>
+                        <div id="quiz-feedback" class="text-xs font-bold text-center hidden p-2 bg-white text-slate-900 rounded-lg"></div>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/20 text-center">
+                        <span class="text-[11px] font-medium text-amber-100"><i class="fa-solid fa-sparkles mr-1"></i> Novas perguntas todos os dias às 08:00</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE CURSOS & CAPACITAÇÃO -->
+        <section id="cursos" class="mb-14 scroll-mt-20">
+            
+            <div class="flex items-center justify-between border-b-2 border-brand-green pb-3 mb-6">
+                <div class="flex items-center space-x-3">
+                    <span class="w-3.5 h-3.5 rounded-sm bg-brand-green"></span>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">CURSOS & DESENVOLVIMENTO PROFISSIONAL</h2>
+                </div>
+                <div class="text-xs font-semibold text-slate-500 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    <i class="fa-solid fa-graduation-cap text-brand-green mr-1"></i> <span class="font-bold text-slate-800">Inscrições Abertas Hoje</span>
+                </div>
+            </div>
+
+            <!-- Courses Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Course Card 1 -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="p-6 gradient-brand text-white">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="badge-green font-extrabold text-[10px] px-2.5 py-1 rounded uppercase">Gratuito com Certificado</span>
+                                <span class="text-xs text-brand-light font-bold"><i class="fa-solid fa-star text-amber-400"></i> 4.9 (1.4k)</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold leading-snug">Introdução às Finanças Pessoais e Investimentos</h3>
+                            <p class="text-xs text-slate-200 mt-2">Aprenda a organizar seu orçamento, investir na renda fixa e Selic com segurança.</p>
+                        </div>
+                        <div class="p-5 text-xs space-y-2 text-slate-600">
+                            <div class="flex items-center"><i class="fa-solid fa-clock text-brand-dark w-5"></i> <span>Carga horária: <strong>20 horas</strong></span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-laptop text-brand-dark w-5"></i> <span>Modalidade: <strong>100% Online / Aulas Gravadas</strong></span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-user-check text-brand-dark w-5"></i> <span>Instrutor: <strong>Prof. Ricardo Santos (Sertified CFP)</strong></span></div>
+                        </div>
+                    </div>
+                    <div class="p-5 pt-0">
+                        <button onclick="enrollCourse('Finanças Pessoais')" class="w-full bg-brand-green hover:bg-emerald-600 text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center">
+                            <i class="fa-solid fa-user-plus mr-2"></i> Garantir Vaga Gratuita
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Course Card 2 -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="p-6 bg-slate-900 text-white">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="bg-brand-light text-white font-extrabold text-[10px] px-2.5 py-1 rounded uppercase">Bootcamp Dev</span>
+                                <span class="text-xs text-brand-light font-bold"><i class="fa-solid fa-star text-amber-400"></i> 4.8 (890)</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold leading-snug">Desenvolvimento Web Fullstack & IA Aplicada</h3>
+                            <p class="text-xs text-slate-300 mt-2">Construa aplicações modernas utilizando HTML, Tailwind, JavaScript e APIs de Inteligência Artificial.</p>
+                        </div>
+                        <div class="p-5 text-xs space-y-2 text-slate-600">
+                            <div class="flex items-center"><i class="fa-solid fa-clock text-brand-dark w-5"></i> <span>Carga horária: <strong>60 horas</strong></span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-code text-brand-dark w-5"></i> <span>Projetos práticos: <strong>4 Portfólios Próprios</strong></span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-briefcase text-brand-dark w-5"></i> <span>Encaminhamento para vagas parceiras</span></div>
+                        </div>
+                    </div>
+                    <div class="p-5 pt-0">
+                        <button onclick="enrollCourse('Dev Fullstack')" class="w-full bg-brand-dark hover:bg-brand-light text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Inscrever-se Agora
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Course Card 3 -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm card-hover-effect flex flex-col justify-between">
+                    <div>
+                        <div class="p-6 bg-slate-800 text-white">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="bg-purple-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded uppercase">Gestão & Carreira</span>
+                                <span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 5.0 (620)</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold leading-snug">Liderança na Era Digital & Gestão de Equipes Remote</h3>
+                            <p class="text-xs text-slate-300 mt-2">Técnicas avançadas de comunicação, métodos ágeis e produtividade para líderes modernos.</p>
+                        </div>
+                        <div class="p-5 text-xs space-y-2 text-slate-600">
+                            <div class="flex items-center"><i class="fa-solid fa-clock text-brand-dark w-5"></i> <span>Carga horária: <strong>30 horas</strong></span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-users text-brand-dark w-5"></i> <span>Mentorias ao vivo semanais</span></div>
+                            <div class="flex items-center"><i class="fa-solid fa-certificate text-brand-dark w-5"></i> <span>Certificado Executivo Válido</span></div>
+                        </div>
+                    </div>
+                    <div class="p-5 pt-0">
+                        <button onclick="enrollCourse('Liderança Digital')" class="w-full bg-brand-dark hover:bg-brand-light text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i> Ver Grade do Curso
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- NEWSLETTER & INSIGHTS BANNER -->
+        <section class="mb-14 gradient-brand rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl font-black select-none pointer-events-none">
+                NEXUS
+            </div>
+            <div class="max-w-3xl relative z-10">
+                <span class="bg-brand-green text-white font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
+                    Boletim Diário Gratuito
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black mb-3">Receba as Principais Notícias e Análises de Mercado no seu E-mail</h2>
+                <p class="text-slate-200 text-sm mb-6">
+                    Todas as manhãs, às 07:00, entregamos um resumo completo com as cotações de bolsas, indicadores econômicos e os fatos mais relevantes do Brasil e do mundo.
+                </p>
+
+                <form onsubmit="handleNewsletter(event)" class="flex flex-col sm:flex-row gap-3">
+                    <input type="email" id="newsletter-email" required placeholder="Digite seu melhor e-mail aqui..." class="px-5 py-3.5 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-brand-light flex-1 shadow">
+                    <button type="submit" class="bg-brand-green hover:bg-emerald-600 text-white font-extrabold px-6 py-3.5 rounded-xl transition shadow flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> Assinar Resumo Diário
+                    </button>
+                </form>
+                <span class="text-[11px] text-slate-300 mt-3 block">Prometemos não enviar spam. Cancele sua inscrição quando quiser.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-400 text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+                
+                <!-- Col 1: About -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center text-white text-lg font-black">N</div>
+                        <span class="text-xl font-black text-white">TRIBUTA CESC NEWS</span>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed mb-4">
+                        O Nexus Jornalismo é um portal dinâmico focado na cobertura imparcial de notícias, cotações financeiras em tempo real, cultura, ciências e desenvolvimento profissional.
+                    </p>
+                    <div class="flex space-x-3 text-base">
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-brand-dark text-slate-300 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-brand-dark text-slate-300 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-brand-dark text-slate-300 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-linkedin"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-brand-dark text-slate-300 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Editorias -->
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wider mb-4 text-xs">Editorias</h4>
+                    <ul class="space-y-2.5">
+                        <li><a href="#noticias" class="hover:text-brand-light transition">Notícias do Brasil</a></li>
+                        <li><a href="#noticias" class="hover:text-brand-light transition">Internacional</a></li>
+                        <li><a href="#financeiro" class="hover:text-brand-light transition">Mercado & Economia</a></li>
+                        <li><a href="#entretenimento" class="hover:text-brand-light transition">Entretenimento & Arte</a></li>
+                        <li><a href="#curiosidades" class="hover:text-brand-light transition">Ciência & Curiosidades</a></li>
+                        <li><a href="#cursos" class="hover:text-brand-light transition">Cursos & Educação</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Mercado & Finanças Fontes -->
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wider mb-4 text-xs">Fontes de Mercado</h4>
+                    <ul class="space-y-2.5">
+                        <li><a href="https://www.bcb.gov.br" target="_blank" rel="noopener" class="hover:text-brand-light transition">Banco Central do Brasil</a></li>
+                        <li><a href="https://www.b3.com.br" target="_blank" rel="noopener" class="hover:text-brand-light transition">B3 Bolsa de Valores</a></li>
+                        <li><a href="https://www.ibge.gov.br" target="_blank" rel="noopener" class="hover:text-brand-light transition">IBGE Inflação IPCA</a></li>
+                        <li><a href="https://www.tesourodireto.com.br" target="_blank" rel="noopener" class="hover:text-brand-light transition">Tesouro Direto / Selic</a></li>
+                        <li><a href="https://valor.globo.com" target="_blank" rel="noopener" class="hover:text-brand-light transition">Valor Econômico</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Institucional -->
+                <div>
+                    <h4 class="font-bold text-white uppercase tracking-wider mb-4 text-xs">Institucional</h4>
+                    <ul class="space-y-2.5">
+                        <li><a href="#" class="hover:text-brand-light transition">Quem Somos</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition">Princípios Editoriais</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition">Política de Privacidade</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition">Fale com a Redação</a></li>
+                        <li><a href="#" class="hover:text-brand-light transition">Trabalhe Conosco</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Legal Line -->
+            <div class="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-slate-500 gap-4">
+                <p>© 2026 TRIBUTA CESCJornalismo Ltda. Todos os direitos reservados. As cotações podem apresentar atraso mínimo regulatório.</p>
+                <div class="flex items-center space-x-4">
+                    <a href="#capa" class="text-brand-light hover:underline font-bold"><i class="fa-solid fa-arrow-up mr-1"></i> Voltar ao Topo</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ARTICLE READER MODAL -->
+    <div id="article-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-3xl w-full my-8 overflow-hidden shadow-2xl border border-slate-200 transform transition-all relative">
+            
+            <!-- Close Button -->
+            <button onclick="closeArticleModal()" class="absolute top-4 right-4 z-10 bg-slate-900/70 hover:bg-slate-900 text-white w-10 h-10 rounded-full flex items-center justify-center transition shadow">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Article Image Cover -->
+            <div class="relative h-64 sm:h-80 w-full overflow-hidden">
+                <img id="modal-img" src="" alt="Imagem da Matéria" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                <div class="absolute bottom-6 left-6 right-6 text-white">
+                    <span id="modal-tag" class="bg-brand-dark text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">
+                        Categoria
+                    </span>
+                    <h2 id="modal-title" class="text-xl sm:text-2xl font-black leading-tight text-white">
+                        Título da Notícia Selecionada
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Article Meta Header -->
+            <div class="p-6 sm:p-8 bg-white border-b border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center space-x-3">
+                    <span id="modal-author" class="font-bold text-slate-800">Por Redação Nexus</span>
+                    <span>•</span>
+                    <span id="modal-date"><i class="fa-regular fa-calendar mr-1"></i> Hoje</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyArticleLink()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-bold transition">
+                        <i class="fa-regular fa-copy mr-1"></i> Copiar Link
+                    </button>
+                </div>
+            </div>
+
+            <!-- Article Body Content -->
+            <div id="modal-body" class="p-6 sm:p-8 text-slate-700 text-sm sm:text-base leading-relaxed space-y-4 max-h-[50vh] overflow-y-auto">
+                <!-- Content injected via JS -->
+            </div>
+
+            <!-- Footer of Modal -->
+            <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                <span class="text-xs text-slate-500 font-medium">Gostou da matéria? Compartilhe com seus amigos.</span>
+                <button onclick="closeArticleModal()" class="bg-brand-dark hover:bg-brand-light text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
+                    Fechar Matéria
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Dynamic Date Setup
+        document.addEventListener("DOMContentLoaded", function() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('pt-BR', options);
+            document.getElementById('current-date').innerText = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+        });
+
+        // Articles Database for Modal
+        const articlesDatabase = {
+            1: {
+                title: "Novo Pacote Econômico e Transição Tecnológica Prometem Impulsionar PIB Nacional em 2026",
+                tag: "Economia & Tecnologia",
+                author: "Carlos Eduardo Silva (Nexus Brasília)",
+                date: "06 de Outubro, 2026",
+                img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",
+                body: `
+                    <p class="font-semibold text-slate-900 text-lg">O Ministério da Fazenda e a Secretaria de Desenvolvimento e Tecnologia anunciaram nesta manhã um abrangente plano de estímulo voltado à modernização industrial e energias renováveis.</p>
+                    <p>O pacote inclui incentivos fiscais para empresas que adotarem matrizes de inteligência artificial na automação de processos produtivos, bem como subsídios para linhas de crédito verde focadas em usinas fotovoltaicas e eólicas.</p>
+                    <p>Analistas do mercado financeiro e economistas chefes dos principais bancos privados receberam a notícia com otimismo. A expectativa é que as medidas atraiam mais de R$ 120 bilhões em investimentos estrangeiros diretos ao longo dos próximos 18 meses, acelerando o crescimento do Produto Interno Bruto (PIB) acima da meta projetada no Boletim Focus do Banco Central.</p>
+                    <p>Além disso, o plano contempla linhas de financiamento facilitado para micro e pequenas empresas que buscam implementar digitalização de pagamentos e eficiência energética.</p>
+                `
+            },
+            2: {
+                title: "Avanço da IA em Diagnósticos Médicos Atinge Marca Histórica em Hospitais do Brasil",
+                tag: "Inovação",
+                author: "Dr. Roberto Camargo",
+                date: "Há 15 minutos",
+                img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Hospitais de referência em São Paulo e no Rio de Janeiro concluíram os testes da nova plataforma nacional de inteligência artificial voltada à triagem e análise preditiva de exames radiológicos.</p>
+                    <p>Os resultados demonstraram uma precisão superior a 98% na identificação precoce de anomalias vasculares e lesões pulmonares em estágio inicial, reduzindo o tempo médio de espera de laudos de 48 horas para menos de 15 minutos.</p>
+                    <p>A tecnologia, desenvolvida por pesquisadores brasileiros em parceria com startups de biotecnologia, será estendida à rede do SUS até o final deste ano.</p>
+                `
+            },
+            3: {
+                title: "Brasil Bate Recorde de Geração de Energia Eólica e Solar no Terceiro Trimestre",
+                tag: "Sustentabilidade",
+                author: "Beatriz Nogueira",
+                date: "Há 42 minutos",
+                img: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Dados divulgados pelo Operador Nacional do Sistema Elétrico (ONS) confirmam que a matriz renovável brasileira atingiu 89% da capacidade total de consumo no país durante o último trimestre.</p>
+                    <p>O avanço dos parques eólicos no Nordeste e das usinas solares no Sudeste permitiu uma economia significativa no uso dos reservatórios das hidrelétricas, afastando o risco de acionamento de usinas térmicas de alto custo.</p>
+                `
+            },
+            4: {
+                title: "Plataformas Gratuitas de Capacitação em TI Registram Recorde de Candidatos",
+                tag: "Educação",
+                author: "Juliana Santos",
+                date: "Há 1 hora",
+                img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Com a forte procura por habilidades digitais e programação, programas governamentais e de grandes empresas de tecnologia registraram mais de 500 mil inscritos na última semana.</p>
+                    <p>Cursos nas áreas de Ciência de Dados, Segurança da Informação e Programação Web oferecem certificação e conexão direta com recrutadores da indústria de tecnologia.</p>
+                `
+            },
+            5: {
+                title: "Governo Anuncia Expansão de Infraestrutura Portuária e Ferroviária",
+                tag: "Brasil",
+                author: "Marina Rocha",
+                date: "Hoje às 08:15",
+                img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>O Ministério dos Transportes apresentou o novo plano integrado de logística para conectar o centro-oeste produtor aos principais portos exportadores da região sul e sudeste.</p>
+                    <p>Com leilões agendados para o segundo semestre, o projeto visa modernizar malhas ferroviárias e elevar a capacidade de embarque nos terminais portuários em mais de 35% nos próximos quatro anos.</p>
+                `
+            },
+            6: {
+                title: "Cúpula Global do Clima Define Novas Metas para Transição Energética",
+                tag: "Mundo",
+                author: "Lucas Mendonça",
+                date: "Hoje às 07:40",
+                img: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Representantes de mais de 80 países assinaram na manhã desta terça-feira o tratado de aceleração de investimentos em fontes limpas de energia e descarbonização da produção industrial.</p>
+                    <p>O documento prevê um fundo multilateral de suporte técnico e financeiro para países em desenvolvimento adotarem tecnologias de hidrogênio verde até 2030.</p>
+                `
+            },
+            7: {
+                title: "Congresso Inicia Votação do Marco Legal da Inteligência Artificial",
+                tag: "Política",
+                author: "Fernanda Lima",
+                date: "Hoje às 06:55",
+                img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Está em pauta na Câmara dos Deputados o projeto que regulamenta a aplicação e o uso responsável de sistemas baseados em inteligência artificial no território brasileiro.</p>
+                    <p>A proposta foca na garantia da privacidade dos dados dos cidadãos, transparência algorítmica e prevê sanções para o uso indevido de tecnologias na criação de conteúdos desinformativos.</p>
+                `
+            },
+            8: {
+                title: "Festival Internacional de Cinema Revela Lista de Filmes Indicados",
+                tag: "Cinema",
+                author: "Redação Entretenimento",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>A organização do festival revelou a seleção oficial dos concorrentes ao prêmio principal deste ano, com destaque para cinco produções da América Latina.</p>
+                    <p>A mostra homenageará obras que abordam memórias históricas e narrativas urbanas contemporâneas.</p>
+                `
+            },
+            9: {
+                title: "Séries mais Aclamadas do Mês: O Que Assistir no Fim de Semana",
+                tag: "Streaming",
+                author: "Redação Cultura",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Confira nossa seleção semanal com os títulos mais assistidos e bem avaliados pelas principais plataformas de streaming.</p>
+                    <p>Destaques para dramas policiais escandinavos, produções históricas e novas minisséries de suspense psicológico.</p>
+                `
+            },
+            10: {
+                title: "Turnê de Grandes Festivais Anuncia Line-up Completo no Brasil",
+                tag: "Música",
+                author: "Redação Música",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Grandes nomes do pop e do rock internacional confirmaram presença na edição do festival que percorrerá São Paulo, Rio de Janeiro, Belo Horizonte, Curitiba e Recife.</p>
+                `
+            },
+            11: {
+                title: "Mercado de Games no Brasil Cresce 18% e Atrai Estúdios Globais",
+                tag: "Games & Tech",
+                author: "Redação Games",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>O setor de jogos eletrônicos no país continua em plena expansão, impulsionado pelo consumo em dispositivos móveis e pelo surgimento de estúdios independentes altamente qualificados.</p>
+                `
+            },
+            12: {
+                title: "Telescópio Espacial Detecta Atmosfera Rica em Água em Exoplaneta Próximo",
+                tag: "Ciência",
+                author: "Núcleo de Ciência Nexus",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Observações espectroscópicas de alta precisão confirmaram a presenção de vapor de água e dióxido de carbono na atmosfera de um exoplaneta localizado a 48 anos-luz da Terra.</p>
+                `
+            },
+            13: {
+                title: "Como as Abelhas Utilizam o Campo Magnético da Terra para se Orientar?",
+                tag: "Curiosidade Biológica",
+                author: "Núcleo de Biologia Nexus",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Cientistas identificaram minúsculos cristais de magnetita no abdômen de abelhas operárias que funcionam como uma bússola biológica integrada, permitindo navegação precisa mesmo em dias nublados.</p>
+                `
+            },
+            14: {
+                title: "Apenas 25% do Fundo do Mar foi Mapeado: O Que Há nas Profundezas?",
+                tag: "Oceano",
+                author: "Oceanografia Nexus",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Apesar dos avanços tecnológicos, a maior parte do relevo oceânico permanece desconhecida. Expedições recentes revelaram ecossistemas prósperos ao redor de fontes hidrotermais em profundidades superiores a 4 mil metros.</p>
+                `
+            },
+            15: {
+                title: "A Origem do Mecanismo de Anticítera: O Primeiro Computador Analógico",
+                tag: "História",
+                author: "Arqueologia Nexus",
+                date: "Hoje",
+                img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1000&q=80",
+                body: `
+                    <p>Construído há mais de 2.000 anos na Grécia Antiga, este complexo sistema de engrenagens de bronze previa posições dos astros, fases da lua e até o calendário dos Jogos Olímpicos.</p>
+                `
+            }
+        };
+
+        // Open Modal Function
+        function openArticleModal(id) {
+            const article = articlesDatabase[id];
+            if (!article) return;
+
+            document.getElementById('modal-img').src = article.img;
+            document.getElementById('modal-tag').innerText = article.tag;
+            document.getElementById('modal-title').innerText = article.title;
+            document.getElementById('modal-author').innerText = "Por " + article.author;
+            document.getElementById('modal-date').innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${article.date}`;
+            document.getElementById('modal-body').innerHTML = article.body;
+
+            const modal = document.getElementById('article-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modal Function
+        function closeArticleModal() {
+            const modal = document.getElementById('article-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close Modal on clicking outside background
+        document.getElementById('article-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeArticleModal();
+            }
+        });
+
+        // Investment Calculator Logic
+        function calculateInvestment() {
+            const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+            const months = parseInt(document.getElementById('calc-months').value) || 12;
+
+            // CDI Estimate: 10.75% per year ~ 0.85% per month
+            const cdiMonthly = 0.0085;
+            // Poupança Estimate: ~ 0.5% per month
+            const poupancaMonthly = 0.005;
+
+            const totalCDI = amount * Math.pow(1 + cdiMonthly, months);
+            const totalPoupanca = amount * Math.pow(1 + poupancaMonthly, months);
+            const diff = totalCDI - totalPoupanca;
+
+            document.getElementById('res-cdi').innerText = totalCDI.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('res-poupanca').innerText = totalPoupanca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('res-diff').innerText = `Ganho extra de ${diff.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} no Tesouro Selic / CDB!`;
+        }
+
+        // Currency Conversion Logic
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('curr-amount').value) || 0;
+            const from = document.getElementById('curr-from').value;
+            const to = document.getElementById('curr-to').value;
+
+            // Rates base: BRL = 1.0, USD = 5.42 BRL, EUR = 5.91 BRL
+            const ratesInBrl = {
+                'BRL': 1.0,
+                'USD': 5.42,
+                'EUR': 5.91
+            };
+
+            const amountInBrl = amount * ratesInBrl[from];
+            const result = amountInBrl / ratesInBrl[to];
+
+            const symbolMap = { 'BRL': 'R$', 'USD': '$', 'EUR': '€' };
+            document.getElementById('curr-result-text').innerText = `${symbolMap[to]} ${result.toFixed(2)}`;
+        }
+
+        // Quiz Feedback Logic
+        function answerQuiz(isCorrect) {
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+            if (isCorrect) {
+                feedback.className = "text-xs font-bold text-center p-3 bg-emerald-100 text-emerald-900 rounded-lg shadow";
+                feedback.innerHTML = "<i class='fa-solid fa-circle-check text-emerald-600 mr-1'></i> Resposta Correta! O Hidrogênio compõe cerca de 75% da matéria do universo.";
+            } else {
+                feedback.className = "text-xs font-bold text-center p-3 bg-rose-100 text-rose-900 rounded-lg shadow";
+                feedback.innerHTML = "<i class='fa-solid fa-circle-xmark text-rose-600 mr-1'></i> Não foi dessa vez! A resposta correta é o <strong>Hidrogênio</strong>.";
+            }
+        }
+
+        // Category Filter Logic
+        function filterCategory(category) {
+            const newsItems = document.querySelectorAll('.news-item');
+            newsItems.forEach(item => {
+                if (category === 'todas' || item.classList.contains(category)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Update Active Filter Styling
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText.toLowerCase() === category || (category === 'todas' && btn.innerText.toLowerCase() === 'todas')) {
+                    btn.className = "cat-btn bg-brand-dark text-white px-3 py-1.5 rounded-lg font-bold";
+                } else {
+                    btn.className = "cat-btn bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-bold";
+                }
+            });
+        }
+
+        // Search Filter Logic
+        function filterArticlesBySearch() {
+            const query = document.getElementById('site-search').value.toLowerCase();
+            const newsItems = document.querySelectorAll('.news-item, article, #financeiro, #entretenimento, #curiosidades, #cursos');
+            
+            // Simple visual highlight feedback
+            if (query.trim() !== '') {
+                console.log("Filtrando portal para:", query);
+            }
+        }
+
+        // Newsletter Signup Handler
+        function handleNewsletter(e) {
+            e.preventDefault();
+            const email = document.getElementById('newsletter-email').value;
+            alert(`Obrigado por se inscrever! Enviamos um e-mail de confirmação para ${email}.`);
+            document.getElementById('newsletter-email').value = '';
+        }
+
+        // Course Enrollment Handler
+        function enrollCourse(courseName) {
+            alert(`Sua pré-inscrição no curso "${courseName}" foi realizada com sucesso! Verifique seu e-mail para acessar o ambiente de aulas.`);
+        }
+
+        // Copy Article Link
+        function copyArticleLink() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            alert("Link da matéria copiado para a área de transferência!");
+        }
+
+        // Toggle Font Size Accessibility
+        let isLargeFont = false;
+        function toggleFontSize() {
+            isLargeFont = !isLargeFont;
+            if (isLargeFont) {
+                document.body.style.fontSize = "110%";
+            } else {
+                document.body.style.fontSize = "100%";
+            }
+        }
+    </script>
+</body>
+</html>
