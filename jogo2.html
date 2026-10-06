@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contab-Man: O Desafio do Balanço Patrimonial</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .font-arcade {
+            font-family: 'Press Start 2P', monospace;
+        }
+        .font-ui {
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        /* Custom Arcade Glow Effects */
+        .neon-text-yellow {
+            text-shadow: 0 0 8px rgba(234, 179, 8, 0.8), 0 0 16px rgba(234, 179, 8, 0.4);
+        }
+        .neon-text-blue {
+            text-shadow: 0 0 8px rgba(59, 130, 246, 0.8), 0 0 16px rgba(59, 130, 246, 0.4);
+        }
+        .neon-box {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3), inset 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Prevent scroll pull-to-refresh on mobile */
+        body {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+        }
+
+        /* Pulse Animation for Power Orbs */
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .pulse-element {
+            animation: pulse-glow 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-ui bg-slate-950 text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header class="w-full bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex items-center justify-between shrink-0 shadow-lg z-20">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-[0_0_10px_rgba(250,204,21,0.6)]">
+                <i class="fa-solid font-arcade text-xs">C</i>
+            </div>
+            <div>
+                <h1 class="font-arcade text-yellow-400 text-xs sm:text-sm tracking-wider">CONTAB-MAN</h1>
+                <p class="text-xs text-cyan-400 font-semibold tracking-wide hidden sm:block">EDITION: BALANÇO PATRIMONIAL</p>
+            </div>
+        </div>
+
+        <!-- HUD: Level, Score, Lives -->
+        <div class="flex items-center gap-4 sm:gap-8 bg-slate-950/80 px-4 py-1.5 rounded-xl border border-slate-800 font-arcade text-xs">
+            <div class="text-center">
+                <span class="text-slate-400 block text-[9px]">FASE</span>
+                <span id="hud-level" class="text-cyan-400 text-sm">1/10</span>
+            </div>
+            <div class="text-center">
+                <span class="text-slate-400 block text-[9px]">PONTOS</span>
+                <span id="hud-score" class="text-yellow-400 text-sm">0000</span>
+            </div>
+            <div class="text-center">
+                <span class="text-slate-400 block text-[9px]">VIDAS</span>
+                <div id="hud-lives" class="flex gap-1 text-red-500 text-xs mt-0.5">
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Helper Actions -->
+        <div class="flex gap-2">
+            <button id="btn-glossary" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 transition text-sm flex items-center gap-1.5" title="Guia do Balanço">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span class="hidden md:inline font-semibold">Guia</span>
+            </button>
+            <button id="btn-sound" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-yellow-500/30 transition text-sm" title="Som">
+                <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col lg:flex-row items-center justify-center p-2 sm:p-4 gap-4 overflow-hidden relative">
+        
+        <!-- SIDEBAR / CURRENT LEVEL INFO (DESKTOP) -->
+        <aside class="hidden lg:flex flex-col w-72 h-full max-h-[620px] bg-slate-900/80 border border-slate-800 rounded-2xl p-4 gap-4 shrink-0 shadow-xl overflow-y-auto">
+            <div class="border-b border-slate-800 pb-3">
+                <span class="text-xs uppercase font-bold tracking-wider text-cyan-400">Objetivo da Fase</span>
+                <h2 id="sidebar-level-title" class="font-bold text-lg text-yellow-400 mt-1">Fase 1: Introdução</h2>
+                <p id="sidebar-level-desc" class="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Aprenda a estrutura fundamental da equação contábil: Ativo = Passivo + Patrimônio Líquido.
+                </p>
+            </div>
+
+            <!-- Current Target / Tip Card -->
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                <div class="flex items-center gap-2 text-yellow-400 text-xs font-bold mb-1">
+                    <i class="fa-solid fa-lightbulb"></i> DICA CONTÁBIL
+                </div>
+                <p id="sidebar-level-tip" class="text-xs text-slate-400 leading-normal">
+                    Fantasmas contêm nomes de contas contábeis. Pegue os Orbes Azuis de Quiz para responder perguntas e ativar o Modo Poder!
+                </p>
+            </div>
+
+            <!-- Ghost Legend for Current Level -->
+            <div class="flex-1 flex flex-col">
+                <span class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">Contas nesta Fase:</span>
+                <div id="ghost-legend-list" class="flex flex-col gap-2">
+                    <!-- Dynamic Ghost List -->
+                </div>
+            </div>
+
+            <!-- Power Mode Status -->
+            <div id="power-status" class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-2.5 text-center hidden">
+                <span class="text-xs font-bold text-yellow-400 font-arcade animate-pulse">MODO PODER ATIVO!</span>
+                <p class="text-[10px] text-yellow-200 mt-1">Devore os fantasmas de contas!</p>
+            </div>
+        </aside>
+
+        <!-- GAME CANVAS CONTAINER -->
+        <div class="relative flex flex-col items-center justify-center w-full max-w-[620px] h-full max-h-[620px]">
+            
+            <div class="relative w-full h-full flex items-center justify-center bg-slate-950 rounded-2xl border-2 border-slate-800 shadow-[0_0_30px_rgba(15,23,42,0.8)] overflow-hidden">
+                <!-- Game Canvas -->
+                <canvas id="gameCanvas" class="block rounded-lg shadow-inner bg-slate-950"></canvas>
+
+                <!-- OVERLAY: START / PAUSE / GAME OVER / LEVEL WIN -->
+                <div id="game-overlay" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-10">
+                    <div id="overlay-content" class="max-w-md w-full flex flex-col items-center">
+                        <i id="overlay-icon" class="fa-solid fa-gamepad text-5xl text-yellow-400 mb-4 animate-bounce"></i>
+                        <h2 id="overlay-title" class="font-arcade text-xl sm:text-2xl text-yellow-400 mb-2">CONTAB-MAN</h2>
+                        <p id="overlay-subtitle" class="text-sm text-slate-300 mb-6 font-ui">
+                            Domine o Balanço Patrimonial! Responda às perguntas contábeis, desvie dos fantasmas e conquiste 10 fases!
+                        </p>
+                        <button id="btn-start" class="w-full max-w-xs py-3 px-6 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-400 hover:to-amber-500 text-slate-950 font-bold font-arcade text-sm rounded-xl shadow-lg shadow-yellow-500/20 transform hover:-translate-y-0.5 active:translate-y-0 transition">
+                            INICIAR JOGO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OVERLAY: QUIZ MODAL -->
+                <div id="quiz-modal" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 z-30 hidden">
+                    <div class="w-full max-w-lg bg-slate-900 border border-cyan-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl text-left relative flex flex-col">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                                <i class="fa-solid fa-circle-question"></i> DESAFIO CONTÁBIL
+                            </span>
+                            <span id="quiz-timer" class="font-arcade text-xs text-yellow-400">FASE <span id="quiz-level-num">1</span></span>
+                        </div>
+
+                        <h3 id="quiz-question" class="text-base sm:text-lg font-bold text-white mb-4 leading-snug">
+                            Pergunta contábil aqui...
+                        </h3>
+
+                        <!-- Options Container -->
+                        <div id="quiz-options" class="flex flex-col gap-2.5 mb-4">
+                            <!-- Options rendered dynamically -->
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div id="quiz-feedback" class="p-3 rounded-xl border text-xs leading-relaxed hidden mb-4">
+                            <!-- Feedback message -->
+                        </div>
+
+                        <button id="quiz-continue-btn" class="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition hidden font-arcade text-xs">
+                            CONTINUAR FASE
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MOBILE TOUCH CONTROLS -->
+            <div class="lg:hidden w-full mt-2 flex items-center justify-around shrink-0 px-2 py-1">
+                <!-- Mobile D-PAD -->
+                <div class="grid grid-cols-3 gap-1 w-36 h-28">
+                    <div></div>
+                    <button id="btn-up" class="bg-slate-800 active:bg-yellow-500 text-cyan-400 active:text-slate-950 border border-slate-700 rounded-lg flex items-center justify-center text-xl shadow">
+                        <i class="fa-solid fa-caret-up"></i>
+                    </button>
+                    <div></div>
+                    <button id="btn-left" class="bg-slate-800 active:bg-yellow-500 text-cyan-400 active:text-slate-950 border border-slate-700 rounded-lg flex items-center justify-center text-xl shadow">
+                        <i class="fa-solid fa-caret-left"></i>
+                    </button>
+                    <div class="flex items-center justify-center text-slate-600">
+                        <i class="fa-solid fa-gamepad text-xs"></i>
+                    </div>
+                    <button id="btn-right" class="bg-slate-800 active:bg-yellow-500 text-cyan-400 active:text-slate-950 border border-slate-700 rounded-lg flex items-center justify-center text-xl shadow">
+                        <i class="fa-solid fa-caret-right"></i>
+                    </button>
+                    <div></div>
+                    <button id="btn-down" class="bg-slate-800 active:bg-yellow-500 text-cyan-400 active:text-slate-950 border border-slate-700 rounded-lg flex items-center justify-center text-xl shadow">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </button>
+                    <div></div>
+                </div>
+
+                <!-- Quick info for mobile -->
+                <div class="text-right text-xs text-slate-400 max-w-[150px]">
+                    <span class="block text-yellow-400 font-bold" id="mobile-level-title">Fase 1</span>
+                    <span class="text-[10px] text-slate-400 block leading-tight mt-0.5" id="mobile-level-sub">Coma as moedas e pegue os orbes de Quiz!</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL: ACCOUNTING GLOSSARY / GUIDE -->
+    <div id="glossary-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-800">
+                <div class="flex items-center gap-2 text-yellow-400 font-bold text-lg">
+                    <i class="fa-solid fa-book-open"></i> Guia Rápido do Balanço Patrimonial
+                </div>
+                <button id="btn-close-glossary" class="text-slate-400 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-6 text-sm">
+                <!-- Group 1: Equação -->
+                <section class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <h3 class="text-yellow-400 font-bold text-base mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i> A Equação Fundamental da Contabilidade
+                    </h3>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        <strong class="text-cyan-400">ATIVO = PASSIVO + PATRIMÔNIO LÍQUIDO</strong><br>
+                        O Balanço Patrimonial reflete a posição financeira da entidade em determinado momento. O Ativo representa as aplicações de recursos (Bens e Direitos), enquanto Passivo e PL representam as origens de recursos (Capital de Terceiros e Próprio).
+                    </p>
+                </section>
+
+                <!-- Group 2: Ativo -->
+                <section>
+                    <h3 class="text-cyan-400 font-bold text-sm mb-2 border-b border-cyan-500/20 pb-1">1. ATIVO (Bens e Direitos)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <span class="font-bold text-yellow-400 block mb-1">Ativo Circulante (AC)</span>
+                            Recursos de alta liquidez conversíveis em dinheiro em até 12 meses. Ex: <em>Caixa, Bancos, Estoques, Clientes/Contas a Receber</em>.
+                        </div>
+                        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <span class="font-bold text-yellow-400 block mb-1">Ativo Não Circulante (ANC)</span>
+                            Bens e direitos de longo prazo (&gt;12 meses) ou permanentes. Dividido em: <em>Realizável a LP, Investimentos, Imobilizado e Intangível</em>.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Group 3: Passivo -->
+                <section>
+                    <h3 class="text-rose-400 font-bold text-sm mb-2 border-b border-rose-500/20 pb-1">2. PASSIVO (Obrigações)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <span class="font-bold text-yellow-400 block mb-1">Passivo Circulante (PC)</span>
+                            Dívidas e obrigações a vencer nos próximos 12 meses. Ex: <em>Fornecedores, Salários a Pagar, Impostos a Recolher</em>.
+                        </div>
+                        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <span class="font-bold text-yellow-400 block mb-1">Passivo Não Circulante (PNC)</span>
+                            Obrigações e financiamentos com vencimento superior a 12 meses. Ex: <em>Financiamentos LP, Debêntures a Pagar</em>.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Group 4: Patrimônio Líquido -->
+                <section>
+                    <h3 class="text-emerald-400 font-bold text-sm mb-2 border-b border-emerald-500/20 pb-1">3. PATRIMÔNIO LÍQUIDO (Capital Próprio)</h3>
+                    <p class="text-slate-300 text-xs leading-relaxed bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                        Representa o valor residual do Ativo após deduzidos os Passivos. Inclui: <em>Capital Social, Reservas de Lucros, Reservas de Capital, Prejuízos Acumulados</em>.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        // --- RETRO SOUND SYNTHESIZER (WEB AUDIO API) ---
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playPellet() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+
+            playOrb() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(880, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.12);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.12);
+                });
+            }
+
+            playWrong() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            playEatGhost() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(900, now + 0.2);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+
+            playDeath() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.6);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.6);
+            }
+        }
+
+        const sounds = new SoundEngine();
+
+        const LEVELS_DATA = [
+            {
+                level: 1,
+                title: "Fase 1: Equação Fundamental",
+                desc: "Entenda os pilares do Balanço Patrimonial: Ativo, Passivo e Patrimônio Líquido.",
+                ghosts: [
+                    { name: "Ativo", color: "#38bdf8" },
+                    { name: "Passivo", color: "#f43f5e" },
+                    { name: "Patrimônio Líquido", color: "#34d399" },
+                    { name: "Balanço", color: "#facc15" }
+                ],
+                questions: [
+                    {
+                        text: "Qual é a Equação Fundamental da Contabilidade expressa no Balanço Patrimonial?",
+                        options: [
+                            "Ativo = Passivo + Patrimônio Líquido",
+                            "Ativo + Passivo = Patrimônio Líquido",
+                            "Patrimônio Líquido = Ativo + Passivo",
+                            "Ativo = Passivo - Receitas"
+                        ],
+                        correct: 0,
+                        explanation: "A equação fundamental estabelece que o total das Aplicações (Ativo) deve ser rigorosamente igual ao total das Origens (Passivo + PL)."
+                    },
+                    {
+                        text: "Se o Ativo de uma empresa é R$ 100.000 e o Passivo é R$ 40.000, qual o valor do Patrimônio Líquido?",
+                        options: [
+                            "R$ 140.000",
+                            "R$ 60.000",
+                            "R$ 40.000",
+                            "R$ 100.000"
+                        ],
+                        correct: 1,
+                        explanation: "Pela equação (Ativo = Passivo + PL), temos: 100.000 = 40.000 + PL -> PL = R$ 60.000."
+                    },
+                    {
+                        text: "As Origens de Recursos de uma empresa são representadas por quais grupos do Balanço?",
+                        options: [
+                            "Apenas pelo Ativo Circulante",
+                            "Passivo (Capital de Terceiros) e Patrimônio Líquido (Capital Próprio)",
+                            "Ativo Circulante e Ativo Não Circulante",
+                            "Apenas pelas Receitas Operacionais"
+                        ],
+                        correct: 1,
+                        explanation: "O Passivo e o PL representam de onde vêm os recursos (Origens), enquanto o Ativo mostra onde foram aplicados."
+                    },
+                    {
+                        text: "As Aplicações de Recursos no Balanço Patrimonial são representadas por qual grupo?",
+                        options: [
+                            "Patrimônio Líquido",
+                            "Passivo Circulante",
+                            "Ativo (Bens e Direitos)",
+                            "Passivo Não Circulante"
+                        ],
+                        correct: 2,
+                        explanation: "O Ativo representa os bens e direitos resultantes de eventos passados nos quais os recursos foram aplicados."
+                    }
+                ]
+            },
+            {
+                level: 2,
+                title: "Fase 2: Ativo Circulante",
+                desc: "Contas de alta liquidez que viram dinheiro no curto prazo (até 12 meses).",
+                ghosts: [
+                    { name: "Caixa", color: "#38bdf8" },
+                    { name: "Bancos", color: "#60a5fa" },
+                    { name: "Estoques", color: "#818cf8" },
+                    { name: "Clientes", color: "#c084fc" }
+                ],
+                questions: [
+                    {
+                        text: "Qual destas contas NÃO pertence ao Ativo Circulante?",
+                        options: [
+                            "Caixa e Equivalentes de Caixa",
+                            "Estoques de Mercadorias",
+                            "Máquinas e Equipamentos da Fábrica",
+                            "Duplicatas a Receber em 60 dias"
+                        ],
+                        correct: 2,
+                        explanation: "Máquinas e Equipamentos pertencem ao Ativo Não Circulante (Imobilizado), pois são bens de uso permanente."
+                    },
+                    {
+                        text: "Qual é a característica principal das contas classificadas no Ativo Circulante?",
+                        options: [
+                            "Dívidas a pagar após 2 anos",
+                            "Alta liquidez ou conversão em dinheiro no prazo de até 12 meses",
+                            "Bens incorpóreos como marcas e patentes",
+                            "Valores investidos exclusivamente pelos sócios"
+                        ],
+                        correct: 1,
+                        explanation: "O Ativo Circulante agrupa bens e direitos com expectativa de realização até o término do exercício social seguinte."
+                    },
+                    {
+                        text: "O dinheiro depositado em conta bancária para movimentação diária da empresa é classificado como:",
+                        options: [
+                            "Passivo Circulante",
+                            "Bancos Conta Movimento (Ativo Circulante)",
+                            "Investimentos de Longo Prazo",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 1,
+                        explanation: "A conta Bancos representa disponibilidade imediata de recursos, sendo do Ativo Circulante."
+                    },
+                    {
+                        text: "Os estoques de produtos acabados prontos para venda devem ser classificados no:",
+                        options: [
+                            "Ativo Circulante",
+                            "Ativo Não Circulante Imobilizado",
+                            "Passivo Circulante",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 0,
+                        explanation: "Estoques de mercadorias destinadas à venda integram o giro operacional de curto prazo (Ativo Circulante)."
+                    }
+                ]
+            },
+            {
+                level: 3,
+                title: "Fase 3: Ativo Não Circulante",
+                desc: "Bens e direitos de permanência de longo prazo ou bens do ativo imobilizado e intangível.",
+                ghosts: [
+                    { name: "Veículos", color: "#38bdf8" },
+                    { name: "Máquinas", color: "#60a5fa" },
+                    { name: "Marcas", color: "#818cf8" },
+                    { name: "Investimentos", color: "#a78bfa" }
+                ],
+                questions: [
+                    {
+                        text: "Onde devem ser classificadas as Marcas e Patentes registradas da empresa?",
+                        options: [
+                            "Ativo Circulante",
+                            "Ativo Não Circulante - Intangível",
+                            "Passivo Não Circulante",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 1,
+                        explanation: "Bens incorpóreos sem existência física destinados à manutenção da empresa pertencem ao Intangível."
+                    },
+                    {
+                        text: "Terrenos e edifícios utilizados nas operações da empresa pertencem a qual subgrupo do Ativo?",
+                        options: [
+                            "Ativo Circulante",
+                            "Ativo Não Circulante - Imobilizado",
+                            "Ativo Realizável a Longo Prazo",
+                            "Passivo Circulante"
+                        ],
+                        correct: 1,
+                        explanation: "Bens tangíveis destinados à atividade operacional da empresa são classificados no Ativo Imobilizado."
+                    },
+                    {
+                        text: "Participações permanentes em outras sociedades são classificadas no Ativo Não Circulante como:",
+                        options: [
+                            "Investimentos",
+                            "Imobilizado",
+                            "Intangível",
+                            "Ativo Circulante"
+                        ],
+                        correct: 0,
+                        explanation: "Aplicações de caráter permanente que não se destinam à manutenção da atividade principal são Investimentos."
+                    },
+                    {
+                        text: "Um empréstimo concedido pela empresa a seus diretores a ser recebido em 24 meses fica no:",
+                        options: [
+                            "Ativo Circulante",
+                            "Ativo Realizável a Longo Prazo (ANC)",
+                            "Passivo Não Circulante",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 1,
+                        explanation: "Direitos a receber com prazo superior a 12 meses ou derivados de coligadas/diretores ficam no Realizável a Longo Prazo."
+                    }
+                ]
+            },
+            {
+                level: 4,
+                title: "Fase 4: Passivo Circulante",
+                desc: "Obrigações e dívidas com vencimento no curto prazo (até 12 meses).",
+                ghosts: [
+                    { name: "Fornecedores", color: "#f43f5e" },
+                    { name: "Salários Pagar", color: "#fb7185" },
+                    { name: "Impostos Pagar", color: "#f43f5e" },
+                    { name: "Empréstimos CP", color: "#fda4af" }
+                ],
+                questions: [
+                    {
+                        text: "A conta 'Fornecedores' representa obrigações decorrentes de compra de insumos a prazo. Ela é um:",
+                        options: [
+                            "Direito no Ativo Circulante",
+                            "Dever/Obrigação no Passivo Circulante",
+                            "Elemento do Patrimônio Líquido",
+                            "Custo de Operação no DRE"
+                        ],
+                        correct: 1,
+                        explanation: "Fornecedores representam dívidas com terceiros de curto prazo, figurando no Passivo Circulante."
+                    },
+                    {
+                        text: "Salários de funcionários a serem pagos no quinto dia útil do mês seguinte são lançados no:",
+                        options: [
+                            "Passivo Circulante (Salários a Pagar)",
+                            "Passivo Não Circulante",
+                            "Ativo Circulante",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 0,
+                        explanation: "Como o fato gerador ocorreu no mês e o pagamento ocorre no mês seguinte (curto prazo), é um Passivo Circulante."
+                    },
+                    {
+                        text: "O que caracteriza fundamentalmente o Passivo Circulante no Balanço Patrimonial?",
+                        options: [
+                            "Obrigações e dívidas com vencimento em até 12 meses",
+                            "Bens disponíveis de uso imediato",
+                            "Dívidas vencíveis após 5 anos",
+                            "Capital investido pelos proprietários"
+                        ],
+                        correct: 0,
+                        explanation: "O Passivo Circulante engloba os compromissos com terceiros exigíveis no curto prazo."
+                    },
+                    {
+                        text: "Impostos apurados no mês (ex: ICMS, ISS) a recolher no mês subsequente figuram no:",
+                        options: [
+                            "Passivo Circulante (Impostos a Recolher)",
+                            "Ativo Não Circulante",
+                            "Passivo Não Circulante",
+                            "Patrimônio Líquido"
+                        ],
+                        correct: 0,
+                        explanation: "Toda obrigação fiscal de curto prazo é registrada no Passivo Circulante."
+                    }
+                ]
+            },
+            {
+                level: 5,
+                title: "Fase 5: Passivo Não Circulante",
+                desc: "Obrigações e compromissos com vencimento superior a 12 meses.",
+                ghosts: [
+                    { name: "Financiamentos LP", color: "#f43f5e" },
+                    { name: "Debêntures LP", color: "#fb7185" },
+                    { name: "Provisões LP", color: "#e11d48" },
+                    { name: "Títulos a Pagar", color: "#be123c" }
+                ],
+                questions: [
+                    {
+                        text: "Um financiamento bancário para ser pago em 48 parcelas mensais terá suas parcelas com vencimento após 12 meses no:",
+                        options: [
+                            "Passivo Circulante apenas",
+                            "Passivo Não Circulante (Exigível a Longo Prazo)",
+                            "Patrimônio Líquido",
+                            "Ativo Realizável a Longo Prazo"
+                        ],
+                        correct: 1,
+                        explanation: "As parcelas cujos vencimentos ultrapassam os 12 meses seguintes pertencem ao Passivo Não Circulante."
+                    },
+                    {
+                        text: "Qual das contas a seguir é classificada no Passivo Não Circulante?",
+                        options: [
+                            "Debêntures a Pagar com vencimento em 3 anos",
+                            "Salários a Pagar do mês",
+                            "Caixa",
+                            "Fornecedores a pagar em 30 dias"
+                        ],
+                        correct: 0,
+                        explanation: "Debêntures e títulos emitidos com vencimento superior a 1 ano são dívidas de Longo Prazo."
+                    },
+                    {
+                        text: "Qual é o prazo regulamentar de vencimento para uma obrigação do Passivo Não Circulante?",
+                        options: [
+                            "Inferior a 30 dias",
+                            "Até o final do mês corrente",
+                            "Superior ao término do exercício social seguinte (> 12 meses)",
+                            "Indefinido e sem exigibilidade"
+                        ],
+                        correct: 2,
+                        explanation: "O critério de classificação no Longo Prazo é o vencimento após o encerramento do exercício seguinte."
+                    },
+                    {
+                        text: "Contingências trabalhistas com alta probabilidade de perda estimada para daqui a 2 anos são contabilizadas no:",
+                        options: [
+                            "Passivo Não Circulante (Provisões)",
+                            "Ativo Circulante",
+                            "Patrimônio Líquido",
+                            "Passivo Circulante"
+                        ],
+                        correct: 0,
+                        explanation: "Provisões para riscos cíveis ou trabalhistas de longo prazo constituem o Passivo Não Circulante."
+                    }
+                ]
+            },
+            {
+                level: 6,
+                title: "Fase 6: Patrimônio Líquido",
+                desc: "Capital próprio dos sócios/acionistas e reservas acumuladas.",
+                ghosts: [
+                    { name: "Capital Social", color: "#34d399" },
+                    { name: "Reserva Lucros", color: "#10b981" },
+                    { name: "Ações Tesouraria", color: "#059669" },
+                    { name: "Lucros Retidos", color: "#6ee7b7" }
+                ],
+                questions: [
+                    {
+                        text: "A conta 'Capital Social' representa:",
+                        options: [
+                            "O total de empréstimos tomados com bancos",
+                            "Os valores investidos pelos sócios/acionistas na empresa",
+                            "O dinheiro físico guardado no cofre",
+                            "As vendas efetuadas durante o mês"
+                        ],
+                        correct: 1,
+                        explanation: "O Capital Social representa o aporte inicial e posterior efetuado pelos proprietários na empresa."
+                    },
+                    {
+                        text: "A parcela de lucros gerados pela empresa que não é distribuída e fica retida para expansão integra as:",
+                        options: [
+                            "Reservas de Lucros (Patrimônio Líquido)",
+                            "Dívidas com Fornecedores",
+                            "Contas do Ativo Circulante",
+                            "Despesas Financeiras"
+                        ],
+                        correct: 0,
+                        explanation: "Lucros não distribuídos sob a forma de dividendos reforçam o Capital Próprio nas Reservas de Lucros."
+                    },
+                    {
+                        text: "A aquisição de ações da própria companhia emitida por ela mesma gera no PL a conta retificadora:",
+                        options: [
+                            "Ações em Tesouraria",
+                            "Capital Social a Integralizar",
+                            "Duplicatas Descontadas",
+                            "Reserva Legal"
+                        ],
+                        correct: 0,
+                        explanation: "Ações em Tesouraria figuram com saldo credor/retificador reduzindo o Patrimônio Líquido."
+                    },
+                    {
+                        text: "Se uma empresa possui Ativo de R$ 200.000 e Passivo (Dívidas) de R$ 250.000, ela apresenta:",
+                        options: [
+                            "Patrimônio Líquido Positivo",
+                            "Passivo a Descoberto (PL Negativo de R$ 50.000)",
+                            "Ativo Circulante Elevado",
+                            "Lucro Acumulado"
+                        ],
+                        correct: 1,
+                        explanation: "Quando as dívidas superam o total de bens e direitos, diz-se que a empresa está com Passivo a Descoberto."
+                    }
+                ]
+            },
+            {
+                level: 7,
+                title: "Fase 7: Contas Retificadoras",
+                desc: "Contas que possuem saldo contrário ao do seu grupo para ajustar seu valor real.",
+                ghosts: [
+                    { name: "Depreciação Acum.", color: "#facc15" },
+                    { name: "PECLD (Provisão)", color: "#eab308" },
+                    { name: "Amortização Acum.", color: "#ca8a04" },
+                    { name: "Deságio", color: "#a16207" }
+                ],
+                questions: [
+                    {
+                        text: "A conta 'Depreciação Acumulada' atua reduzindo o saldo do Ativo Imobilizado. Ela é conhecida como:",
+                        options: [
+                            "Conta de Receita Operacional",
+                            "Conta Retificadora / Redutora do Ativo",
+                            "Passivo Exigível",
+                            "Conta Transitória de Resultado"
+                        ],
+                        correct: 1,
+                        explanation: "Contas retificadoras possuem natureza oposta ao seu grupo patrimonial para demonstrar a desvalorização real."
+                    },
+                    {
+                        text: "Qual destas contas é uma conta retificadora do Ativo Circulante (Clientes/Contas a Receber)?",
+                        options: [
+                            "PECLD (Perdas Estimadas com Créditos de Liquidação Duvidosa)",
+                            "Capital Social",
+                            "Fornecedores",
+                            "Caixa"
+                        ],
+                        correct: 0,
+                        explanation: "A PECLD ajusta o saldo de Clientes para refletir a estimativa de calotes e devedores duvidosos."
+                    },
+                    {
+                        text: "Qual é o objetivo principal das contas retificadoras (ou redutoras) no Balanço?",
+                        options: [
+                            "Aumentar artificialmente o patrimônio da empresa",
+                            "Ajustar o valor contábil dos bens, direitos ou PL ao seu valor real de realização",
+                            "Registrar apenas pagamentos em dinheiro",
+                            "Substituir a Demonstração do Resultado"
+                        ],
+                        correct: 1,
+                        explanation: "As contas retificadoras corrigem saldos para atender ao Princípio da Prudência e demonstrar valores reais."
+                    },
+                    {
+                        text: "A conta 'Amortização Acumulada' é retificadora de qual subgrupo do Ativo?",
+                        options: [
+                            "Ativo Intangível",
+                            "Ativo Circulante",
+                            "Investimentos",
+                            "Realizável a Longo Prazo"
+                        ],
+                        correct: 0,
+                        explanation: "A perda de valor dos bens incorpóreos (Intangível) ao longo do tempo é registrada como Amortização Acumulada."
+                    }
+                ]
+            },
+            {
+                level: 8,
+                title: "Fase 8: Ordenação e Liquidez",
+                desc: "As contas são dispostas em ordem decrescente de liquidez (Ativo) e exigibilidade (Passivo).",
+                ghosts: [
+                    { name: "Disponível", color: "#38bdf8" },
+                    { name: "Realizável LP", color: "#818cf8" },
+                    { name: "Curto Prazo", color: "#f43f5e" },
+                    { name: "Longo Prazo", color: "#be123c" }
+                ],
+                questions: [
+                    {
+                        text: "No Ativo do Balanço Patrimonial, as contas são dispostas em ordem:",
+                        options: [
+                            "Crescente de valor monetário",
+                            "Decrescente de grau de liquidez (conversão em dinheiro)",
+                            "Alfabética dos nomes das contas",
+                            "Aleatória conforme decisão do contador"
+                        ],
+                        correct: 1,
+                        explanation: "As contas mais líquidas (Caixa/Bancos) aparecem no topo, descendo até as menos líquidas (Intangível)."
+                    },
+                    {
+                        text: "No Passivo, as obrigações são ordenadas de acordo com:",
+                        options: [
+                            "O grau de exigibilidade (prazos de vencimento mais próximos primeiro)",
+                            "A ordem alfabética do fornecedor",
+                            "Apenas os valores dos juros incidentes",
+                            "A preferência dos acionistas"
+                        ],
+                        correct: 0,
+                        explanation: "O Passivo ordena-se pelo grau de exigibilidade: o Passivo Circulante precede o Passivo Não Circulante."
+                    },
+                    {
+                        text: "Qual destas contas do Ativo possui o MAIOR grau de liquidez?",
+                        options: [
+                            "Estoque de Matéria-Prima",
+                            "Caixa e Equivalentes de Caixa",
+                            "Edifícios da Fábrica",
+                            "Marcas e Patentes"
+                        ],
+                        correct: 1,
+                        explanation: "O dinheiro em Caixa ou depósito bancário já é moeda pronta, representando liquidez máxima."
+                    },
+                    {
+                        text: "O conceito de 'Liquidez' no Balanço Patrimonial refere-se a:",
+                        options: [
+                            "Velocidade e facilidade com que um ativo pode ser convertido em dinheiro",
+                            "Quantidade de água utilizada no processo fabril",
+                            "Lucro líquido apurado no final do ano",
+                            "Total de dívidas acumuladas com impostos"
+                        ],
+                        correct: 0,
+                        explanation: "Liquidez é a capacidade de transformar um bem ou direito em disponibilidade de caixa rapidamente."
+                    }
+                ]
+            },
+            {
+                level: 9,
+                title: "Fase 9: Indicadores de Liquidez",
+                desc: "Métricas extraídas do Balanço para avaliar a capacidade de pagamento.",
+                ghosts: [
+                    { name: "Liquidez Corrente", color: "#38bdf8" },
+                    { name: "Liquidez Seca", color: "#facc15" },
+                    { name: "Capital Giro", color: "#34d399" },
+                    { name: "Endividamento", color: "#f43f5e" }
+                ],
+                questions: [
+                    {
+                        text: "Como é calculado o Índice de Liquidez Corrente (LC)?",
+                        options: [
+                            "Ativo Circulante / Passivo Circulante",
+                            "Passivo Circulante / Ativo Total",
+                            "(Ativo Circulante - Estoques) / Passivo Circulante",
+                            "Patrimônio Líquido / Ativo Circulante"
+                        ],
+                        correct: 0,
+                        explanation: "A Liquidez Corrente mede quanto a empresa tem no Ativo Circulante para cada R$ 1,00 de dívida de curto prazo."
+                    },
+                    {
+                        text: "O Índice de Liquidez Seca diferencia-se da Liquidez Corrente por subtrair qual conta do Ativo Circulante?",
+                        options: [
+                            "Caixa",
+                            "Estoques (devido à menor liquidez de venda)",
+                            "Bancos",
+                            "Clientes"
+                        ],
+                        correct: 1,
+                        explanation: "A Liquidez Seca exclui os Estoques por exigirem vendas prévias para se tornarem dinheiro."
+                    },
+                    {
+                        text: "Se uma empresa possui Liquidez Corrente igual a 1,5, isto indica que:",
+                        options: [
+                            "Ela tem R$ 1,50 em Ativo Circulante para cada R$ 1,00 de dívida de curto prazo",
+                            "Ela está falida e não pode pagar nada",
+                            "Seu Passivo é 50% maior que o Ativo",
+                            "Seus estoques estão zerados"
+                        ],
+                        correct: 0,
+                        explanation: "Índice maior que 1,0 indica que a empresa possui folga de curto prazo para honrar compromissos."
+                    },
+                    {
+                        text: "O Capital Circulante Líquido (CCL) de uma empresa é obtido por qual fórmula?",
+                        options: [
+                            "CCL = Ativo Circulante - Passivo Circulante",
+                            "CCL = Ativo Total + Passivo Total",
+                            "CCL = Patrimônio Líquido / Passivo Não Circulante",
+                            "CCL = Receita Brutal - Imagem Comercial"
+                        ],
+                        correct: 0,
+                        explanation: "O Capital Circulante Líquido mede a folga financeira de curto prazo em termos monetários (AC - PC)."
+                    }
+                ]
+            },
+            {
+                level: 10,
+                title: "Fase 10: Desafio Mestre do Balanço",
+                desc: "O grande teste final reunindo toda a estrutura e lançamentos no Balanço Patrimonial!",
+                ghosts: [
+                    { name: "Ativo Total", color: "#38bdf8" },
+                    { name: "Passivo Total", color: "#f43f5e" },
+                    { name: "PL Final", color: "#34d399" },
+                    { name: "Equilíbrio", color: "#facc15" }
+                ],
+                questions: [
+                    {
+                        text: "Se uma empresa tem Ativo Total de R$ 500.000 e Passivo Total de R$ 200.000, qual é o seu Patrimônio Líquido?",
+                        options: [
+                            "R$ 700.000",
+                            "R$ 300.000",
+                            "R$ 200.000",
+                            "R$ 500.000"
+                        ],
+                        correct: 1,
+                        explanation: "Pela equação (Ativo = Passivo + PL) -> 500.000 = 200.000 + PL -> PL = R$ 300.000."
+                    },
+                    {
+                        text: "A compra de mercadorias para estoque à vista por R$ 10.000 altera o Balanço de que maneira?",
+                        options: [
+                            "Aumenta o Ativo Total em R$ 10.000",
+                            "Permuta entre contas do Ativo Circulante (sai Caixa, entra Estoques), mantendo o Ativo Total inalterado",
+                            "Aumenta o Passivo Circulante",
+                            "Reduz o Patrimônio Líquido"
+                        ],
+                        correct: 1,
+                        explanation: "Trata-se de um fato permutativo: troca de um Ativo (Caixa) por outro Ativo (Estoques) de mesmo valor."
+                    },
+                    {
+                        text: "A aquisição de um veículo a prazo por R$ 50.000 afeta o Balanço Patrimonial como?",
+                        options: [
+                            "Aumenta o Ativo Imobilizado (+50k) e aumenta o Passivo (+50k)",
+                            "Diminui o Ativo Circulante",
+                            "Aumenta o Patrimônio Líquido",
+                            "Não provoca nenhum lançamento contábil"
+                        ],
+                        correct: 0,
+                        explanation: "Fato modificativo/permutativo entre Ativo e Passivo: gera um novo bem e uma nova obrigação correspondente."
+                    },
+                    {
+                        text: "O pagamento em dinheiro de uma dívida com Fornecedores provoca qual efeito no Balanço?",
+                        options: [
+                            "Reduz o Ativo Circulante (Caixa) e reduz o Passivo Circulante (Fornecedores)",
+                            "Aumenta o Ativo e diminui o Passivo",
+                            "Aumenta o Patrimônio Líquido",
+                            "Aumenta os Estoques da empresa"
+                        ],
+                        correct: 0,
+                        explanation: "A quitação de obrigação reduz simultaneousamente o Ativo (saída de dinheiro) e o Passivo (extinção da dívida)."
+                    }
+                ]
+            }
+        ];
+
+
+        // Maze grid dimensions: 19 columns x 15 rows
+        const COLS = 19;
+        const ROWS = 15;
+
+        // Tile types: 1 = Wall, 0 = Pellet, 2 = Empty, 3 = Power/Quiz Orb, 4 = Ghost House Spawn
+        const MAZE_TEMPLATE = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3,1],
+            [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+            [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1],
+            [1,1,1,1,0,1,1,1,2,4,2,1,1,1,0,1,1,1,1],
+            [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+            [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+            [1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,3,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+
+        class GameEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.currentLevelIdx = 0;
+                this.score = 0;
+                this.lives = 3;
+                this.powerMode = false;
+                this.powerTimer = null;
+                this.askedQuestions = []; // Track asked questions per level session
+
+                this.tileSize = 24;
+                this.grid = [];
+                
+                this.pacman = {
+                    x: 9,
+                    y: 10,
+                    px: 0,
+                    py: 0,
+                    dirX: 0,
+                    dirY: 0,
+                    nextDirX: 0,
+                    nextDirY: 0,
+                    speed: 0.12,
+                    mouthAngle: 0.2,
+                    mouthSpeed: 0.03
+                };
+
+                this.ghosts = [];
+                this.gameState = 'IDLE'; // IDLE, PLAYING, QUIZ, PAUSED, GAMEOVER, WIN
+                
+                this.totalPellets = 0;
+                this.pelletsEaten = 0;
+
+                this.setupCanvas();
+                this.bindEvents();
+            }
+
+            setupCanvas() {
+                // Responsive canvas sizing inside container
+                const container = this.canvas.parentElement;
+                const maxW = container.clientWidth - 16;
+                const maxH = container.clientHeight - 16;
+
+                const tileW = Math.floor(maxW / COLS);
+                const tileH = Math.floor(maxH / ROWS);
+                
+                this.tileSize = Math.max(16, Math.min(tileW, tileH, 32));
+                
+                this.canvas.width = COLS * this.tileSize;
+                this.canvas.height = ROWS * this.tileSize;
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                    this.render();
+                });
+
+                // Keyboard controls
+                window.addEventListener('keydown', (e) => {
+                    if (this.gameState !== 'PLAYING') return;
+
+                    switch(e.key) {
+                        case 'ArrowUp': case 'w': case 'W':
+                            this.pacman.nextDirX = 0; this.pacman.nextDirY = -1;
+                            e.preventDefault();
+                            break;
+                        case 'ArrowDown': case 's': case 'S':
+                            this.pacman.nextDirX = 0; this.pacman.nextDirY = 1;
+                            e.preventDefault();
+                            break;
+                        case 'ArrowLeft': case 'a': case 'A':
+                            this.pacman.nextDirX = -1; this.pacman.nextDirY = 0;
+                            e.preventDefault();
+                            break;
+                        case 'ArrowRight': case 'd': case 'D':
+                            this.pacman.nextDirX = 1; this.pacman.nextDirY = 0;
+                            e.preventDefault();
+                            break;
+                    }
+                });
+
+                // Mobile D-Pad listeners
+                const bindBtn = (id, dx, dy) => {
+                    const btn = document.getElementById(id);
+                    if (!btn) return;
+                    const trigger = (e) => {
+                        e.preventDefault();
+                        if (this.gameState === 'PLAYING') {
+                            this.pacman.nextDirX = dx;
+                            this.pacman.nextDirY = dy;
+                        }
+                    };
+                    btn.addEventListener('touchstart', trigger, {passive: false});
+                    btn.addEventListener('mousedown', trigger);
+                };
+
+                bindBtn('btn-up', 0, -1);
+                bindBtn('btn-down', 0, 1);
+                bindBtn('btn-left', -1, 0);
+                bindBtn('btn-right', 1, 0);
+
+                // UI Buttons
+                document.getElementById('btn-start').addEventListener('click', () => {
+                    this.startNewGame();
+                });
+
+                document.getElementById('btn-glossary').addEventListener('click', () => {
+                    document.getElementById('glossary-modal').classList.remove('hidden');
+                });
+                document.getElementById('btn-close-glossary').addEventListener('click', () => {
+                    document.getElementById('glossary-modal').classList.add('hidden');
+                });
+
+                document.getElementById('btn-sound').addEventListener('click', () => {
+                    sounds.muted = !sounds.muted;
+                    const icon = document.getElementById('sound-icon');
+                    if (sounds.muted) {
+                        icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+                    } else {
+                        icon.className = 'fa-solid fa-volume-high text-yellow-400';
+                    }
+                });
+
+                document.getElementById('quiz-continue-btn').addEventListener('click', () => {
+                    document.getElementById('quiz-modal').classList.add('hidden');
+                    this.gameState = 'PLAYING';
+                    this.loop();
+                });
+            }
+
+            startNewGame() {
+                this.score = 0;
+                this.lives = 3;
+                this.currentLevelIdx = 0;
+                this.loadLevel(this.currentLevelIdx);
+                document.getElementById('game-overlay').classList.add('hidden');
+                this.gameState = 'PLAYING';
+                this.loop();
+            }
+
+            loadLevel(idx) {
+                this.currentLevelIdx = idx;
+                this.askedQuestions = []; // Reset question history for new level
+                const lvlData = LEVELS_DATA[idx];
+
+                // Deep copy maze template
+                this.grid = MAZE_TEMPLATE.map(row => [...row]);
+                this.totalPellets = 0;
+                this.pelletsEaten = 0;
+
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (this.grid[r][c] === 0 || this.grid[r][c] === 3) {
+                            this.totalPellets++;
+                        }
+                    }
+                }
+
+                // Reset Pacman
+                this.pacman.x = 9;
+                this.pacman.y = 10;
+                this.pacman.px = 9;
+                this.pacman.py = 10;
+                this.pacman.dirX = 0;
+                this.pacman.dirY = 0;
+                this.pacman.nextDirX = 0;
+                this.pacman.nextDirY = 0;
+
+                // Setup Ghosts from Level Data
+                this.ghosts = lvlData.ghosts.map((g, i) => {
+                    const startX = 8 + (i % 3);
+                    const startY = 7;
+                    return {
+                        name: g.name,
+                        color: g.color,
+                        x: startX,
+                        y: startY,
+                        px: startX,
+                        py: startY,
+                        dirX: (i % 2 === 0) ? 1 : -1,
+                        dirY: 0,
+                        speed: 0.05 + (idx * 0.005)
+                    };
+                });
+
+                this.powerMode = false;
+                if (this.powerTimer) clearTimeout(this.powerTimer);
+
+                this.updateHUD();
+                this.updateSidebar();
+            }
+
+            updateHUD() {
+                document.getElementById('hud-level').innerText = `${this.currentLevelIdx + 1}/10`;
+                document.getElementById('hud-score').innerText = String(this.score).padStart(4, '0');
+                
+                const livesContainer = document.getElementById('hud-lives');
+                livesContainer.innerHTML = '';
+                for (let i = 0; i < this.lives; i++) {
+                    livesContainer.innerHTML += '<i class="fa-solid fa-heart"></i>';
+                }
+            }
+
+            updateSidebar() {
+                const lvl = LEVELS_DATA[this.currentLevelIdx];
+                document.getElementById('sidebar-level-title').innerText = lvl.title;
+                document.getElementById('sidebar-level-desc').innerText = lvl.desc;
+                
+                const legendList = document.getElementById('ghost-legend-list');
+                legendList.innerHTML = '';
+                lvl.ghosts.forEach(g => {
+                    legendList.innerHTML += `
+                        <div class="flex items-center gap-2 bg-slate-950/80 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${g.color}"></span>
+                            <span class="text-xs font-semibold text-slate-200 truncate">${g.name}</span>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('mobile-level-title').innerText = lvl.title;
+            }
+
+            isWall(x, y) {
+                const r = Math.round(y);
+                const c = Math.round(x);
+                if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return true;
+                return this.grid[r][c] === 1;
+            }
+
+            update() {
+                if (this.gameState !== 'PLAYING') return;
+
+                // --- PACMAN MOVEMENT ---
+                // Try applying next direction if aligned to tile center
+                const isCenteredX = Math.abs(this.pacman.px - Math.round(this.pacman.px)) < 0.08;
+                const isCenteredY = Math.abs(this.pacman.py - Math.round(this.pacman.py)) < 0.08;
+
+                if (isCenteredX && isCenteredY) {
+                    const currentTileX = Math.round(this.pacman.px);
+                    const currentTileY = Math.round(this.pacman.py);
+
+                    // Check if requested direction is walkable
+                    if (this.pacman.nextDirX !== 0 || this.pacman.nextDirY !== 0) {
+                        if (!this.isWall(currentTileX + this.pacman.nextDirX, currentTileY + this.pacman.nextDirY)) {
+                            this.pacman.dirX = this.pacman.nextDirX;
+                            this.pacman.dirY = this.pacman.nextDirY;
+                        }
+                    }
+
+                    // Handle Pellet consumption at exact tile center
+                    const tileType = this.grid[currentTileY][currentTileX];
+                    if (tileType === 0) { // Standard pellet
+                        this.grid[currentTileY][currentTileX] = 2;
+                        this.score += 10;
+                        this.pelletsEaten++;
+                        sounds.playPellet();
+                        this.updateHUD();
+                        this.checkLevelWin();
+                    } else if (tileType === 3) { // Quiz Power Orb
+                        this.grid[currentTileY][currentTileX] = 2;
+                        this.score += 50;
+                        this.pelletsEaten++;
+                        sounds.playOrb();
+                        this.updateHUD();
+                        this.triggerQuizModal();
+                        return; // Pause loop for modal
+                    }
+                }
+
+                // Move Pacman if path is clear
+                const nextPx = this.pacman.px + this.pacman.dirX * this.pacman.speed;
+                const nextPy = this.pacman.py + this.pacman.dirY * this.pacman.speed;
+
+                const checkX = Math.round(nextPx + this.pacman.dirX * 0.45);
+                const checkY = Math.round(nextPy + this.pacman.dirY * 0.45);
+
+                if (!this.isWall(checkX, checkY)) {
+                    this.pacman.px = nextPx;
+                    this.pacman.py = nextPy;
+                }
+
+                // Animate Mouth
+                this.pacman.mouthAngle += this.pacman.mouthSpeed;
+                if (this.pacman.mouthAngle > 0.45 || this.pacman.mouthAngle < 0.05) {
+                    this.pacman.mouthSpeed = -this.pacman.mouthSpeed;
+                }
+
+                // --- GHOSTS MOVEMENT & AI ---
+                this.ghosts.forEach(ghost => {
+                    const gCenteredX = Math.abs(ghost.px - Math.round(ghost.px)) < 0.08;
+                    const gCenteredY = Math.abs(ghost.py - Math.round(ghost.py)) < 0.08;
+
+                    if (gCenteredX && gCenteredY) {
+                        const curGX = Math.round(ghost.px);
+                        const curGY = Math.round(ghost.py);
+
+                        // Find available directions
+                        const possibleDirs = [
+                            { dx: 1, dy: 0 },
+                            { dx: -1, dy: 0 },
+                            { dx: 0, dy: 1 },
+                            { dx: 0, dy: -1 }
+                        ].filter(d => {
+                            // Don't reverse immediately unless trapped
+                            if (d.dx === -ghost.dirX && d.dy === -ghost.dirY) return false;
+                            return !this.isWall(curGX + d.dx, curGY + d.dy);
+                        });
+
+                        if (possibleDirs.length > 0) {
+                            const chosen = possibleDirs[Math.floor(Math.random() * possibleDirs.length)];
+                            ghost.dirX = chosen.dx;
+                            ghost.dirY = chosen.dy;
+                        } else {
+                            // Reverse if stuck
+                            ghost.dirX = -ghost.dirX;
+                            ghost.dirY = -ghost.dirY;
+                        }
+                    }
+
+                    ghost.px += ghost.dirX * ghost.speed;
+                    ghost.py += ghost.dirY * ghost.speed;
+
+                    // --- COLLISION DETECT WITH PACMAN ---
+                    const dist = Math.hypot(ghost.px - this.pacman.px, ghost.py - this.pacman.py);
+                    if (dist < 0.6) {
+                        if (this.powerMode) {
+                            // Pacman eats Ghost
+                            sounds.playEatGhost();
+                            this.score += 200;
+                            this.updateHUD();
+                            // Respawn ghost in center
+                            ghost.px = 9;
+                            ghost.py = 7;
+                        } else {
+                            // Pacman gets hit
+                            this.handlePacmanDeath();
+                        }
+                    }
+                });
+            }
+
+            triggerQuizModal() {
+                this.gameState = 'QUIZ';
+                const lvl = LEVELS_DATA[this.currentLevelIdx];
+
+                // Filter questions that haven't been asked yet in this level session
+                let availableIndices = lvl.questions
+                    .map((_, i) => i)
+                    .filter(i => !this.askedQuestions.includes(i));
+
+                // If all questions in the level were asked, reset asked pool to recycle
+                if (availableIndices.length === 0) {
+                    this.askedQuestions = [];
+                    availableIndices = lvl.questions.map((_, i) => i);
+                }
+
+                // Randomly pick a question index from remaining pool
+                const chosenIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+                this.askedQuestions.push(chosenIndex);
+                
+                const quiz = lvl.questions[chosenIndex];
+
+                document.getElementById('quiz-level-num').innerText = this.currentLevelIdx + 1;
+                document.getElementById('quiz-question').innerText = quiz.text;
+
+                const optionsContainer = document.getElementById('quiz-options');
+                const feedbackBox = document.getElementById('quiz-feedback');
+                const continueBtn = document.getElementById('quiz-continue-btn');
+
+                optionsContainer.innerHTML = '';
+                feedbackBox.classList.add('hidden');
+                continueBtn.classList.add('hidden');
+
+                quiz.options.forEach((optText, optIdx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left p-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:border-cyan-400 text-xs text-slate-200 transition font-ui flex items-center justify-between group';
+                    btn.innerHTML = `
+                        <span>${optText}</span>
+                        <i class="fa-regular fa-circle text-slate-500 group-hover:text-cyan-400"></i>
+                    `;
+
+                    btn.addEventListener('click', () => {
+                        // Disable all option buttons
+                        Array.from(optionsContainer.children).forEach(b => b.disabled = true);
+
+                        if (optIdx === quiz.correct) {
+                            // Correct
+                            sounds.playCorrect();
+                            btn.className = 'w-full text-left p-3 rounded-xl border border-emerald-500 bg-emerald-500/20 text-emerald-300 text-xs font-ui flex items-center justify-between';
+                            btn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-400';
+                            
+                            feedbackBox.className = 'p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 text-xs leading-relaxed mb-4';
+                            feedbackBox.innerHTML = `<strong><i class="fa-solid fa-circle-check"></i> RESPOSTA CORRETA!</strong><br>${quiz.explanation}`;
+                            
+                            // Activate Power Mode
+                            this.activatePowerMode();
+                        } else {
+                            // Wrong
+                            sounds.playWrong();
+                            btn.className = 'w-full text-left p-3 rounded-xl border border-rose-500 bg-rose-500/20 text-rose-300 text-xs font-ui flex items-center justify-between';
+                            btn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-400';
+
+                            feedbackBox.className = 'p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-200 text-xs leading-relaxed mb-4';
+                            feedbackBox.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation"></i> RESPOSTA INCORRETA!</strong><br>${quiz.explanation}`;
+                        }
+
+                        feedbackBox.classList.remove('hidden');
+                        continueBtn.classList.remove('hidden');
+                    });
+
+                    optionsContainer.appendChild(btn);
+                });
+
+                document.getElementById('quiz-modal').classList.remove('hidden');
+            }
+
+            activatePowerMode() {
+                this.powerMode = true;
+                const statusBadge = document.getElementById('power-status');
+                statusBadge.classList.remove('hidden');
+
+                if (this.powerTimer) clearTimeout(this.powerTimer);
+                this.powerTimer = setTimeout(() => {
+                    this.powerMode = false;
+                    statusBadge.classList.add('hidden');
+                }, 8000); // 8 seconds of vulnerability
+            }
+
+            handlePacmanDeath() {
+                sounds.playDeath();
+                this.lives--;
+                this.updateHUD();
+
+                if (this.lives <= 0) {
+                    this.triggerGameOver();
+                } else {
+                    // Respawn Pacman
+                    this.pacman.px = 9;
+                    this.pacman.py = 10;
+                    this.pacman.dirX = 0;
+                    this.pacman.dirY = 0;
+                    this.pacman.nextDirX = 0;
+                    this.pacman.nextDirY = 0;
+                }
+            }
+
+            checkLevelWin() {
+                if (this.pelletsEaten >= this.totalPellets) {
+                    sounds.playCorrect();
+                    if (this.currentLevelIdx + 1 < LEVELS_DATA.length) {
+                        this.currentLevelIdx++;
+                        this.loadLevel(this.currentLevelIdx);
+                    } else {
+                        this.triggerGameWin();
+                    }
+                }
+            }
+
+            triggerGameOver() {
+                this.gameState = 'GAMEOVER';
+                const overlay = document.getElementById('game-overlay');
+                document.getElementById('overlay-icon').className = 'fa-solid fa-skull text-5xl text-rose-500 mb-4';
+                document.getElementById('overlay-title').innerText = 'FIM DE JOGO';
+                document.getElementById('overlay-subtitle').innerText = `Seu Balanço Patrimonial fechou com ${this.score} pontos! Tente novamente para dominar todas as fases contábeis.`;
+                document.getElementById('btn-start').innerText = 'REINICIAR JOGO';
+                overlay.classList.remove('hidden');
+            }
+
+            triggerGameWin() {
+                this.gameState = 'WIN';
+                const overlay = document.getElementById('game-overlay');
+                document.getElementById('overlay-icon').className = 'fa-solid fa-trophy text-5xl text-yellow-400 mb-4 animate-bounce';
+                document.getElementById('overlay-title').innerText = 'PARABÉNS, CONTADOR!';
+                document.getElementById('overlay-subtitle').innerText = `Você concluiu com sucesso todas as 10 fases do Balanço Patrimonial! Pontuação total: ${this.score} pontos.`;
+                document.getElementById('btn-start').innerText = 'JOGAR NOVAMENTE';
+                overlay.classList.remove('hidden');
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // --- 1. RENDER MAZE ---
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        const cell = this.grid[r][c];
+                        const x = c * this.tileSize;
+                        const y = r * this.tileSize;
+
+                        if (cell === 1) { // Wall
+                            this.ctx.fillStyle = '#1e293b'; // Slate 800
+                            this.ctx.strokeStyle = '#3b82f6'; // Blue glow border
+                            this.ctx.lineWidth = 1.5;
+                            
+                            this.ctx.beginPath();
+                            this.ctx.roundRect(x + 1, y + 1, this.tileSize - 2, this.tileSize - 2, 4);
+                            this.ctx.fill();
+                            this.ctx.stroke();
+                        } else if (cell === 0) { // Pellet
+                            this.ctx.fillStyle = '#fde047'; // Yellow
+                            this.ctx.beginPath();
+                            this.ctx.arc(x + this.tileSize / 2, y + this.tileSize / 2, 2.5, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        } else if (cell === 3) { // Quiz Power Orb
+                            this.ctx.fillStyle = '#06b6d4'; // Cyan glow
+                            this.ctx.shadowColor = '#06b6d4';
+                            this.ctx.shadowBlur = 8;
+                            this.ctx.beginPath();
+                            this.ctx.arc(x + this.tileSize / 2, y + this.tileSize / 2, 6, 0, Math.PI * 2);
+                            this.ctx.fill();
+                            this.ctx.shadowBlur = 0; // Reset glow
+                        }
+                    }
+                }
+
+                // --- 2. RENDER PACMAN ---
+                const pacX = this.pacman.px * this.tileSize + this.tileSize / 2;
+                const pacY = this.pacman.py * this.tileSize + this.tileSize / 2;
+                const radius = this.tileSize / 2 - 2;
+
+                let angleOffset = 0;
+                if (this.pacman.dirX === 1) angleOffset = 0;
+                if (this.pacman.dirX === -1) angleOffset = Math.PI;
+                if (this.pacman.dirY === 1) angleOffset = Math.PI / 2;
+                if (this.pacman.dirY === -1) angleOffset = -Math.PI / 2;
+
+                this.ctx.fillStyle = '#facc15';
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    pacX, pacY, radius,
+                    angleOffset + this.pacman.mouthAngle,
+                    angleOffset + Math.PI * 2 - this.pacman.mouthAngle
+                );
+                this.ctx.lineTo(pacX, pacY);
+                this.ctx.fill();
+
+                // --- 3. RENDER GHOSTS & ACCOUNT NAMES ---
+                this.ghosts.forEach(ghost => {
+                    const gx = ghost.px * this.tileSize + this.tileSize / 2;
+                    const gy = ghost.py * this.tileSize + this.tileSize / 2;
+                    const gRadius = this.tileSize / 2 - 2;
+
+                    // Ghost Body
+                    this.ctx.fillStyle = this.powerMode ? '#3b82f6' : ghost.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(gx, gy - 2, gRadius, Math.PI, 0, false);
+                    this.ctx.lineTo(gx + gRadius, gy + gRadius);
+                    // Tentacles
+                    this.ctx.lineTo(gx + gRadius / 2, gy + gRadius - 3);
+                    this.ctx.lineTo(gx, gy + gRadius);
+                    this.ctx.lineTo(gx - gRadius / 2, gy + gRadius - 3);
+                    this.ctx.lineTo(gx - gRadius, gy + gRadius);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // Eyes
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.beginPath();
+                    this.ctx.arc(gx - 3, gy - 4, 3, 0, Math.PI * 2);
+                    this.ctx.arc(gx + 3, gy - 4, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = '#020617';
+                    this.ctx.beginPath();
+                    this.ctx.arc(gx - 3 + ghost.dirX, gy - 4 + ghost.dirY, 1.5, 0, Math.PI * 2);
+                    this.ctx.arc(gx + 3 + ghost.dirX, gy - 4 + ghost.dirY, 1.5, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Account Name Tag floating above/below ghost
+                    this.ctx.font = 'bold 9px Rajdhani, sans-serif';
+                    this.ctx.textAlign = 'center';
+                    
+                    // Label Background Badge
+                    const textWidth = this.ctx.measureText(ghost.name).width;
+                    this.ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+                    this.ctx.fillRect(gx - textWidth / 2 - 3, gy - gRadius - 13, textWidth + 6, 12);
+                    
+                    this.ctx.fillStyle = this.powerMode ? '#93c5fd' : '#ffffff';
+                    this.ctx.fillText(ghost.name, gx, gy - gRadius - 4);
+                });
+            }
+
+            loop() {
+                if (this.gameState === 'PLAYING') {
+                    this.update();
+                    this.render();
+                    requestAnimationFrame(() => this.loop());
+                }
+            }
+        }
+
+        let game;
+        window.addEventListener('DOMContentLoaded', () => {
+            game = new GameEngine();
+        });
+    </script>
+</body>
+</html>
