@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forca Contábil</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eef3f8;color:#24344d;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.app{width:min(900px,100%);background:#fff;border-radius:24px;padding:28px;box-shadow:0 12px 35px rgba(0,0,0,.12)}
+h1{text-align:center;margin:0;color:#315b91;font-size:34px}
+.sub{text-align:center;color:#68778c;margin:8px 0 24px}
+.layout{display:grid;grid-template-columns:1fr 1.15fr;gap:25px}
+.panel{background:#f7f9fc;border-radius:18px;padding:18px}
+canvas{display:block;width:100%;height:auto}
+.tip{background:#eaf2ff;border-left:5px solid #4f7fbd;border-radius:10px;padding:15px;font-size:18px;margin-bottom:20px}
+.word{text-align:center;font-size:42px;font-weight:bold;letter-spacing:8px;min-height:60px;margin-bottom:20px;color:#315b91}
+.keyboard{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+button{border:0;border-radius:9px;padding:11px 5px;font-weight:bold;font-size:15px;cursor:pointer;background:#e4ebf4;color:#29466d}
+button:hover:not(:disabled){background:#d2e0f2}
+button:disabled{opacity:.4;cursor:not-allowed}
+.status{text-align:center;font-weight:bold;font-size:18px;min-height:28px;margin:16px 0}
+.new{display:block;margin:auto;background:#315b91;color:white;padding:13px 22px;font-size:16px}
+.new:hover{background:#254a78}
+.stats{text-align:center;color:#66768b;margin-top:15px;font-weight:bold}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.keyboard{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:430px){.keyboard{grid-template-columns:repeat(5,1fr)}.word{font-size:30px;letter-spacing:5px}h1{font-size:28px}}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>🎯 Forca Contábil</h1>
+<p class="sub">Descubra palavras relacionadas à contabilidade!</p>
+
+<div class="layout">
+<section class="panel">
+<canvas id="forca" width="340" height="300" aria-label="Desenho da forca"></canvas>
+<div class="stats">Erros: <span id="erros">0</span>/6 &nbsp; • &nbsp; Pontos: <span id="pontos">0</span></div>
+</section>
+
+<section class="panel">
+<div class="tip">💡 <b>Dica:</b> <span id="dica"></span></div>
+<div id="palavra" class="word" aria-live="polite"></div>
+<div id="teclado" class="keyboard"></div>
+<div id="status" class="status" aria-live="polite"></div>
+<button id="nova" class="new" type="button">Nova palavra</button>
+</section>
+</div>
+</main>
+
+<script>
+const palavras=[
+["LUCRO","Dinheiro que sobra depois dos gastos."],
+["CLIENTE","Pessoa que compra um produto ou serviço."],
+["SALARIO","Dinheiro recebido pelo trabalho."],
+["BANCO","Instituição onde podemos guardar dinheiro."],
+["CAIXA","Dinheiro disponível para a empresa usar."],
+["PRECO","Valor que pagamos por um produto ou serviço."],
+["COMPRA","Quando adquirimos um produto ou serviço."],
+["VENDA","Quando uma empresa oferece algo e recebe dinheiro."],
+["ESTOQUE","Produtos guardados para serem vendidos."],
+["IMPOSTO","Valor pago ao governo."],
+["DIVIDA","Valor que ainda precisa ser pago."],
+["EMPRESA","Negócio que vende produtos ou serviços."],
+["NOTA","Documento que registra uma compra ou venda."],
+["RECIBO","Comprovante de pagamento."],
+["GASTO","Dinheiro usado para pagar alguma coisa."]
+];
+
+const letras="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+let atual, usadas=new Set(), erros=0, pontos=0, terminou=false;
+
+const canvas=document.getElementById("forca"),ctx=canvas.getContext("2d");
+const dica=document.getElementById("dica"),palavra=document.getElementById("palavra");
+const teclado=document.getElementById("teclado"),status=document.getElementById("status");
+const errosEl=document.getElementById("erros"),pontosEl=document.getElementById("pontos");
+
+function desenhar(){
+ ctx.clearRect(0,0,340,300);
+ ctx.strokeStyle="#31506f";ctx.lineWidth=6;ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.moveTo(35,270);ctx.lineTo(295,270);
+ ctx.moveTo(80,270);ctx.lineTo(80,35);ctx.lineTo(220,35);ctx.lineTo(220,68);ctx.stroke();
+
+ ctx.strokeStyle="#d05a5a";ctx.lineWidth=5;
+ if(erros>=1){ctx.beginPath();ctx.arc(220,92,22,0,Math.PI*2);ctx.stroke()}
+ if(erros>=2){ctx.beginPath();ctx.moveTo(220,114);ctx.lineTo(220,180);ctx.stroke()}
+ if(erros>=3){ctx.beginPath();ctx.moveTo(220,130);ctx.lineTo(185,155);ctx.stroke()}
+ if(erros>=4){ctx.beginPath();ctx.moveTo(220,130);ctx.lineTo(255,155);ctx.stroke()}
+ if(erros>=5){ctx.beginPath();ctx.moveTo(220,180);ctx.lineTo(190,225);ctx.stroke()}
+ if(erros>=6){ctx.beginPath();ctx.moveTo(220,180);ctx.lineTo(250,225);ctx.stroke()}
+}
+
+function mostrarPalavra(){
+ palavra.textContent=atual[0].split("").map(l=>usadas.has(l)?l:"_").join(" ");
+}
+
+function montarTeclado(){
+ teclado.innerHTML="";
+ letras.forEach(l=>{
+  const b=document.createElement("button");
+  b.textContent=l;b.type="button";
+  b.disabled=usadas.has(l)||terminou;
+  b.onclick=()=>jogar(l);
+  teclado.appendChild(b);
+ });
+}
+
+function finalizar(msg,ok){
+ terminou=true;
+ status.textContent=msg;
+ status.style.color=ok?"#21845a":"#c03939";
+ montarTeclado();
+}
+
+function jogar(l){
+ if(terminou||usadas.has(l))return;
+ usadas.add(l);
+
+ if(atual[0].includes(l)){
+  pontos+=10;pontosEl.textContent=pontos;
+  if(atual[0].split("").every(x=>usadas.has(x))){
+   pontos+=(6-erros)*5;pontosEl.textContent=pontos;
+   finalizar("🎉 Parabéns! Você acertou!",true);
+  }
+ }else{
+  erros++;errosEl.textContent=erros;desenhar();
+  if(erros===6)finalizar("😅 A palavra era "+atual[0]+".",false);
+ }
+ mostrarPalavra();montarTeclado();
+}
+
+function nova(){
+ atual=palavras[Math.floor(Math.random()*palavras.length)];
+ usadas=new Set();erros=0;terminou=false;
+ dica.textContent=atual[1];errosEl.textContent="0";
+ status.textContent="";status.style.color="";
+ desenhar();mostrarPalavra();montarTeclado();
+}
+
+document.addEventListener("keydown",e=>{
+ if(/^[a-zA-Z]$/.test(e.key))jogar(e.key.toUpperCase());
+});
+document.getElementById("nova").onclick=nova;
+nova();
+</script>
+</body>
+</html>
