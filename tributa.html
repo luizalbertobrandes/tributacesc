@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIUBUTA - Portal de Jogos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Press Start 2P -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        triubuta: {
+                            dark: '#0056A0',      // Cor primária
+                            secondary: '#40a9FF', // Destaques / Secundária
+                            accent: '#7AC143',    // Ações / Sucesso / Botões de Jogar
+                            deep: '#03213d',      // Fundo escuro
+                            card: '#0a325c',      // Cards
+                            hover: '#08437a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        pixel: ['"Press Start 2P"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #03182b;
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glow-accent {
+            box-shadow: 0 0 15px rgba(122, 193, 67, 0.4);
+        }
+
+        .glow-secondary {
+            box-shadow: 0 0 15px rgba(64, 169, 255, 0.4);
+        }
+
+        .gradient-brand {
+            background: linear-gradient(135deg, #0056A0 0%, #40a9FF 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #7AC143 0%, #5ba32b 100%);
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #03213d;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #40a9FF;
+            border-radius: 4px;
+        }
+
+        /* Modal backdrop blur */
+        .backdrop-blur-custom {
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-100 overflow-x-hidden scrollbar-thin">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-[#0056A0]/90 backdrop-blur-md border-b border-[#40a9FF]/30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="resetFilters()">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#40a9FF] to-[#7AC143] flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
+                    <i class="fa-solid font-bold fa-gamepad text-2xl text-white"></i>
+                </div>
+                <div>
+                    <span class="font-black text-2xl tracking-wider text-white flex items-center gap-1 font-pixel text-lg sm:text-xl">
+                        TRIUBUTA
+                    </span>
+                    <span class="text-[10px] text-[#40a9FF] font-semibold tracking-widest uppercase block -mt-1">
+                        Portal de Jogos
+                    </span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md hidden md:block">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar jogos por nome ou categoria..." 
+                        class="w-full pl-10 pr-4 py-2 bg-[#03213d]/80 border border-[#40a9FF]/40 rounded-full text-sm text-white placeholder-slate-300 focus:outline-none focus:border-[#7AC143] focus:ring-1 focus:ring-[#7AC143] transition-all">
+                </div>
+            </div>
+
+            <!-- Header Action Buttons -->
+            <div class="flex items-center gap-3">
+                <button onclick="openAddGameModal()" class="gradient-accent hover:opacity-90 text-slate-9 font-bold px-4 py-2.5 rounded-xl shadow-md flex items-center gap-2 transition-all transform active:scale-95 text-sm sm:text-base text-slate-950">
+                    <i class="fa-solid fa-plus text-slate-950"></i>
+                    <span class="hidden sm:inline">Adicionar Jogo</span>
+                    <span class="sm:hidden">Novo</span>
+                </button>
+
+                <button onclick="toggleFavoritesOnly()" id="favToggleBtn" class="bg-[#03213d] hover:bg-[#08437a] border border-[#40a9FF]/40 px-3 py-2.5 rounded-xl text-yellow-400 flex items-center gap-2 text-sm transition-all" title="Ver Favoritos">
+                    <i class="fa-solid fa-star"></i>
+                    <span id="favCountBadge" class="bg-[#40a9FF] text-xs font-bold text-slate-950 px-2 py-0.5 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="px-4 pb-3 md:hidden">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                <input type="text" id="mobileSearchInput" oninput="handleSearchMobile()" placeholder="Buscar jogos..." 
+                    class="w-full pl-10 pr-4 py-2 bg-[#03213d] border border-[#40a9FF]/40 rounded-full text-sm text-white placeholder-slate-300 focus:outline-none focus:border-[#7AC143]">
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="relative bg-gradient-to-r from-[#0056A0] via-[#03213d] to-[#0056A0] border-b border-[#40a9FF]/20 py-8 px-4 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-3 text-center md:text-left max-w-xl">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#7AC143]/20 border border-[#7AC143]/50 text-[#7AC143] text-xs font-semibold uppercase tracking-wider">
+                    <i class="fa-solid fa-bolt"></i> Plataforma Completa & Expansível
+                </span>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                    Jogue e insira seus próprios <span class="text-[#40a9FF]">Jogos Favoritos</span>
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base">
+                    Acesse dezenas de jogos arcade, puzzle e ação diretamente no portal ou adicione novos games via iframe, código JS ou links.
+                </p>
+            </div>
+
+            <!-- Quick Stats Card -->
+            <div class="grid grid-cols-3 gap-3 w-full md:w-auto">
+                <div class="bg-[#0a325c]/80 border border-[#40a9FF]/30 p-3 sm:p-4 rounded-2xl text-center min-w-[90px]">
+                    <div class="text-xl sm:text-2xl font-black text-[#40a9FF]" id="statTotalGames">0</div>
+                    <div class="text-[11px] text-slate-300 uppercase font-medium">Jogos</div>
+                </div>
+                <div class="bg-[#0a325c]/80 border border-[#7AC143]/30 p-3 sm:p-4 rounded-2xl text-center min-w-[90px]">
+                    <div class="text-xl sm:text-2xl font-black text-[#7AC143]" id="statUserGames">0</div>
+                    <div class="text-[11px] text-slate-300 uppercase font-medium">Criados</div>
+                </div>
+                <div class="bg-[#0a325c]/80 border border-[#40a9FF]/30 p-3 sm:p-4 rounded-2xl text-center min-w-[90px]">
+                    <div class="text-xl sm:text-2xl font-black text-yellow-400" id="statPlays">0</div>
+                    <div class="text-[11px] text-slate-300 uppercase font-medium">Partidas</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- Category Filters & Toolbar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#40a9FF]/20 pb-4">
+            
+            <!-- Category Pills -->
+            <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-thin" id="categoryContainer">
+                <!-- Dynamically populated categories -->
+            </div>
+
+            <!-- Sort dropdown -->
+            <div class="flex items-center gap-2 self-end sm:self-auto text-xs text-slate-300">
+                <label for="sortBy" class="whitespace-nowrap"><i class="fa-solid fa-arrow-down-short-wide"></i> Ordenar:</label>
+                <select id="sortBy" onchange="renderGames()" class="bg-[#03213d] border border-[#40a9FF]/30 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-[#7AC143]">
+                    <option value="popular">Mais Populares</option>
+                    <option value="newest">Mais Recentes</option>
+                    <option value="rating">Melhor Avaliados</option>
+                    <option value="title">Ordem Alfabética</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Games Grid -->
+        <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Game Cards injected via JavaScript -->
+        </div>
+
+        <!-- Empty state message -->
+        <div id="emptyState" class="hidden text-center py-16 space-y-4">
+            <div class="w-20 h-20 mx-auto rounded-full bg-[#03213d] border-2 border-[#40a9FF] flex items-center justify-center text-4xl text-[#40a9FF]">
+                <i class="fa-solid fa-ghost"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Nenhum jogo encontrado</h3>
+            <p class="text-slate-400 text-sm max-w-md mx-auto">Tente alterar os filtros de busca ou clique no botão acima para adicionar um novo jogo ao portal TRIUBUTA.</p>
+            <button onclick="openAddGameModal()" class="gradient-accent text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:scale-105 transition-transform text-sm">
+                <i class="fa-solid fa-plus"></i> Cadastrar Novo Jogo
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#0056A0] border-t border-[#40a9FF]/30 mt-12 py-8 text-center text-xs text-slate-300">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-[#7AC143] flex items-center justify-center font-bold text-slate-950">T</div>
+                <span class="font-bold text-sm tracking-wide text-white">TRIUBUTA Portal de Jogos</span>
+            </div>
+            <p>© 2026 TRIUBUTA. Desenvolvido com tecnologia HTML5 & JS Interativo.</p>
+            <div class="flex items-center gap-4 text-slate-300">
+                <a href="#" onclick="alertToast('Portal TRIUBUTA versão 2.5'); return false;" class="hover:text-[#40a9FF]">Sobre</a>
+                <a href="#" onclick="openAddGameModal(); return false;" class="hover:text-[#7AC143]">Cadastrar Jogo</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ADD GAME MODAL -->
+    <div id="addGameModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-custom">
+        <div class="bg-[#03213d] border-2 border-[#40a9FF] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative text-slate-100">
+            
+            <button onclick="closeAddGameModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-[#0a325c] flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-[#40a9FF]/30 pb-4 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-[#7AC143] text-slate-950 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">Adicionar Novo Jogo ao TRIUBUTA</h2>
+                    <p class="text-xs text-slate-400">Insira jogos via Embed, Iframe, URL externa ou código Canvas HTML5</p>
+                </div>
+            </div>
+
+            <form id="addGameForm" onsubmit="handleSaveGame(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Title -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Título do Jogo *</label>
+                        <input type="text" id="newTitle" required placeholder="Ex: Super Space Runner"
+                            class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]">
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Categoria *</label>
+                        <select id="newCategory" required class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]">
+                            <option value="Arcade">Arcade</option>
+                            <option value="Ação">Ação</option>
+                            <option value="Quebra-cabeça">Quebra-cabeça</option>
+                            <option value="Esportes">Esportes</option>
+                            <option value="Estratégia">Estratégia</option>
+                            <option value="Customizado">Customizado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Type Selector -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Integração do Jogo *</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="border border-[#40a9FF]/40 bg-[#0a325c] p-2.5 rounded-xl cursor-pointer hover:border-[#7AC143] flex items-center gap-2 text-xs font-medium">
+                            <input type="radio" name="gameType" value="iframe" checked onchange="toggleTypeInputs('iframe')" class="accent-[#7AC143]">
+                            <span>Iframe / Embed</span>
+                        </label>
+                        <label class="border border-[#40a9FF]/40 bg-[#0a325c] p-2.5 rounded-xl cursor-pointer hover:border-[#7AC143] flex items-center gap-2 text-xs font-medium">
+                            <input type="radio" name="gameType" value="external" onchange="toggleTypeInputs('external')" class="accent-[#7AC143]">
+                            <span>Link Externo</span>
+                        </label>
+                        <label class="border border-[#40a9FF]/40 bg-[#0a325c] p-2.5 rounded-xl cursor-pointer hover:border-[#7AC143] flex items-center gap-2 text-xs font-medium">
+                            <input type="radio" name="gameType" value="canvas" onchange="toggleTypeInputs('canvas')" class="accent-[#7AC143]">
+                            <span>Código HTML/JS</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Source URL or Code -->
+                <div id="urlContainer">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1" id="urlLabel">URL do Jogo (Iframe/Web) *</label>
+                    <input type="url" id="newGameUrl" placeholder="https://exemplo.com/jogo" 
+                        class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]">
+                    <span class="text-[11px] text-slate-400 block mt-1">Ex: Jogos do itch.io, Construct, Poki ou servidores próprios.</span>
+                </div>
+
+                <div id="codeContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Código HTML5 / JS do Jogo</label>
+                    <textarea id="newGameCode" rows="4" placeholder="<canvas id='myGame'></canvas><script>...</script>"
+                        class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-xs font-mono text-emerald-300 focus:outline-none focus:border-[#7AC143]"></textarea>
+                </div>
+
+                <!-- Thumbnail URL or Presets -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">URL da Thumbnail / Capa (Opcional)</label>
+                    <input type="url" id="newThumbUrl" placeholder="https://exemplo.com/imagem.jpg"
+                        class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]">
+                    
+                    <!-- Thumbnail preset buttons -->
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-[11px] text-slate-400">Sugestões de capa:</span>
+                        <button type="button" onclick="setPresetThumb(1)" class="text-[10px] bg-[#0056A0] px-2 py-1 rounded text-slate-200 border border-[#40a9FF]/30">Arcade</button>
+                        <button type="button" onclick="setPresetThumb(2)" class="text-[10px] bg-[#0056A0] px-2 py-1 rounded text-slate-200 border border-[#40a9FF]/30">Cyber</button>
+                        <button type="button" onclick="setPresetThumb(3)" class="text-[10px] bg-[#0056A0] px-2 py-1 rounded text-slate-200 border border-[#40a9FF]/30">Retrô</button>
+                    </div>
+                </div>
+
+                <!-- Description & Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Descrição Breve</label>
+                        <textarea id="newDescription" rows="2" placeholder="Descreva sobre o que é o jogo..."
+                            class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Instruções de Controle</label>
+                        <textarea id="newControls" rows="2" placeholder="Ex: Setas para mover, Espaço para pular"
+                            class="w-full bg-[#0a325c] border border-[#40a9FF]/40 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#7AC143]"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddGameModal()" class="px-4 py-2 rounded-xl bg-[#0a325c] text-slate-300 hover:text-white text-sm font-medium">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="gradient-accent text-slate-950 font-bold px-6 py-2 rounded-xl shadow-lg hover:scale-105 transition-transform text-sm">
+                        <i class="fa-solid fa-check"></i> Salvar Jogo no TRIUBUTA
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GAME PLAYER THEATER MODAL -->
+    <div id="gamePlayerModal" class="fixed inset-0 z-50 hidden flex flex-col bg-slate-950/95 backdrop-blur-md">
+        
+        <!-- Game Player Header -->
+        <div class="bg-[#0056A0] border-b border-[#40a9FF]/30 px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-[#7AC143] text-slate-950 font-bold flex items-center justify-center">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div>
+                    <h2 id="activeGameTitle" class="text-base sm:text-lg font-bold text-white leading-none">Título do Jogo</h2>
+                    <span id="activeGameCategory" class="text-[11px] text-[#40a9FF] font-medium">Categoria</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="toggleActiveFavorite()" id="activeFavBtn" class="bg-[#03213d] hover:bg-[#08437a] text-yellow-400 p-2 rounded-lg border border-[#40a9FF]/30 transition-colors" title="Favoritar">
+                    <i class="fa-regular fa-star text-base" id="activeFavIcon"></i>
+                </button>
+                <button onclick="toggleFullscreen()" class="bg-[#03213d] hover:bg-[#08437a] text-slate-200 p-2 rounded-lg border border-[#40a9FF]/30 transition-colors" title="Tela Cheia">
+                    <i class="fa-solid fa-expand text-base"></i>
+                </button>
+                <button onclick="closeGamePlayer()" class="bg-red-600/80 hover:bg-red-600 text-white p-2 rounded-lg transition-colors ml-2" title="Fechar Jogo">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen Area -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+            
+            <!-- Main Viewport -->
+            <div class="flex-1 bg-black flex items-center justify-center relative p-2 overflow-hidden" id="gameFrameContainer">
+                <!-- Canvas or iframe dynamically inserted here -->
+            </div>
+
+            <!-- Game Info & Controls Panel -->
+            <div class="w-full md:w-80 bg-[#03213d] border-t md:border-t-0 md:border-l border-[#40a9FF]/30 p-4 flex flex-col justify-between overflow-y-auto scrollbar-thin">
+                <div class="space-y-4">
+                    <!-- Rating and Plays -->
+                    <div class="flex items-center justify-between border-b border-[#40a9FF]/20 pb-3">
+                        <div>
+                            <div class="text-xs text-slate-400">Avaliação</div>
+                            <div class="flex items-center gap-1 text-yellow-400 text-sm font-bold" id="activeGameRating">
+                                <i class="fa-solid fa-star"></i> 4.8
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400">Jogadas</div>
+                            <div class="text-sm font-bold text-[#40a9FF]" id="activeGamePlays">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Controls instruction box -->
+                    <div class="bg-[#0a325c] border border-[#40a9FF]/30 p-3 rounded-xl space-y-1">
+                        <div class="text-xs font-bold text-[#7AC143] uppercase flex items-center gap-1">
+                            <i class="fa-solid fa-keyboard"></i> Controles
+                        </div>
+                        <p id="activeGameControls" class="text-xs text-slate-200 leading-relaxed">
+                            Setas do teclado ou touch.
+                        </p>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="space-y-1">
+                        <div class="text-xs font-bold text-slate-300 uppercase">Descrição</div>
+                        <p id="activeGameDesc" class="text-xs text-slate-300 leading-relaxed">
+                            Sem descrição disponível.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-4 border-t border-[#40a9FF]/20">
+                    <button onclick="restartActiveGame()" class="w-full bg-[#0056A0] hover:bg-[#08437a] border border-[#40a9FF] text-white py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-solid fa-rotate-right"></i> Reiniciar Jogo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        
+        // Preset Games Data Base
+        const DEFAULT_GAMES = [
+            {
+                id: 'snake_native',
+                title: 'Cyber Snake TRIUBUTA',
+                category: 'Arcade',
+                type: 'native_snake',
+                thumb: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80',
+                description: 'O clássico jogo da cobra totalmente reinventado com visuais neon no estilo TRIUBUTA.',
+                controls: 'Setas do Teclado ou Teclas W, A, S, D para direcionar.',
+                plays: 1240,
+                rating: 4.9,
+                isNative: true,
+                createdAt: Date.now() - 1000000
+            },
+            {
+                id: 'pong_native',
+                title: 'Retro Pong 2026',
+                category: 'Arcade',
+                type: 'native_pong',
+                thumb: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80',
+                description: 'Enfrente a Inteligência Artificial em uma emocionante partida de Pong.',
+                controls: 'Setas Cima / Baixo ou W / S para mover sua raquete.',
+                plays: 890,
+                rating: 4.7,
+                isNative: true,
+                createdAt: Date.now() - 900000
+            },
+            {
+                id: 'space_defender',
+                title: 'Defender das Galáxias',
+                category: 'Ação',
+                type: 'native_space',
+                thumb: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=400&auto=format&fit=crop&q=80',
+                description: 'Destrua meteoros e naves inimigas para proteger o setor espacial TRIUBUTA.',
+                controls: 'Mova com as Setas, Espaço para atirar.',
+                plays: 2150,
+                rating: 4.9,
+                isNative: true,
+                createdAt: Date.now() - 800000
+            },
+            {
+                id: 'memory_matrix',
+                title: 'Jogo da Memória Matrix',
+                category: 'Quebra-cabeça',
+                type: 'native_memory',
+                thumb: 'https://images.unsplash.com/photo-1606168094336-48f205276929?w=400&auto=format&fit=crop&q=80',
+                description: 'Teste sua memória combinando os símbolos cibernéticos no menor número de tentativas.',
+                controls: 'Clique nas cartas para virar.',
+                plays: 640,
+                rating: 4.6,
+                isNative: true,
+                createdAt: Date.now() - 700000
+            }
+        ];
+
+        // State variables
+        let gamesList = [];
+        let favorites = new Set();
+        let currentFilter = 'Todos';
+        let activeGame = null;
+        let activeGameLoop = null;
+        let showFavoritesOnly = false;
+
+        window.onload = function() {
+            loadSavedData();
+            renderCategories();
+            renderGames();
+            updateStats();
+        };
+
+        // Load persisted games and favorites from LocalStorage
+        function loadSavedData() {
+            const savedCustom = localStorage.getItem('triubuta_custom_games');
+            const customGames = savedCustom ? JSON.parse(savedCustom) : [];
+            gamesList = [...DEFAULT_GAMES, ...customGames];
+
+            const savedFavs = localStorage.getItem('triubuta_favorites');
+            if (savedFavs) {
+                favorites = new Set(JSON.parse(savedFavs));
+            }
+            updateFavBadge();
+        }
+
+        function saveCustomGames() {
+            const customOnly = gamesList.filter(g => !g.isNative);
+            localStorage.setItem('triubuta_custom_games', JSON.stringify(customOnly));
+            updateStats();
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('triubuta_favorites', JSON.stringify([...favorites]));
+            updateFavBadge();
+        }
+
+        function updateFavBadge() {
+            document.getElementById('favCountBadge').innerText = favorites.size;
+        }
+
+        function updateStats() {
+            document.getElementById('statTotalGames').innerText = gamesList.length;
+            const customCount = gamesList.filter(g => !g.isNative).length;
+            document.getElementById('statUserGames').innerText = customCount;
+            
+            const totalPlays = gamesList.reduce((acc, g) => acc + (g.plays || 0), 0);
+            document.getElementById('statPlays').innerText = totalPlays;
+        }
+
+        function renderCategories() {
+            const categories = ['Todos', 'Arcade', 'Ação', 'Quebra-cabeça', 'Esportes', 'Estratégia', 'Customizado'];
+            const container = document.getElementById('categoryContainer');
+            
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setCategory('${cat}')" 
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${currentFilter === cat && !showFavoritesOnly ? 'bg-[#7AC143] text-slate-950 shadow-md' : 'bg-[#03213d] text-slate-300 hover:bg-[#08437a] border border-[#40a9FF]/30'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            currentFilter = cat;
+            showFavoritesOnly = false;
+            document.getElementById('favToggleBtn').classList.remove('ring-2', 'ring-yellow-400');
+            renderCategories();
+            renderGames();
+        }
+
+        function toggleFavoritesOnly() {
+            showFavoritesOnly = !showFavoritesOnly;
+            const btn = document.getElementById('favToggleBtn');
+            if (showFavoritesOnly) {
+                btn.classList.add('ring-2', 'ring-yellow-400');
+                alertToast("Exibindo apenas jogos favoritos!");
+            } else {
+                btn.classList.remove('ring-2', 'ring-yellow-400');
+            }
+            renderGames();
+        }
+
+        function resetFilters() {
+            currentFilter = 'Todos';
+            showFavoritesOnly = false;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('mobileSearchInput').value = '';
+            document.getElementById('favToggleBtn').classList.remove('ring-2', 'ring-yellow-400');
+            renderCategories();
+            renderGames();
+        }
+
+        function renderGames() {
+            const grid = document.getElementById('gamesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const searchVal = (document.getElementById('searchInput').value || document.getElementById('mobileSearchInput').value || '').toLowerCase();
+            const sortVal = document.getElementById('sortBy').value;
+
+            // Filter logic
+            let filtered = gamesList.filter(game => {
+                const matchesCat = currentFilter === 'Todos' || game.category === currentFilter;
+                const matchesSearch = game.title.toLowerCase().includes(searchVal) || 
+                                     game.description.toLowerCase().includes(searchVal) ||
+                                     game.category.toLowerCase().includes(searchVal);
+                const matchesFav = !showFavoritesOnly || favorites.has(game.id);
+                return matchesCat && matchesSearch && matchesFav;
+            });
+
+            // Sorting logic
+            filtered.sort((a, b) => {
+                if (sortVal === 'popular') return (b.plays || 0) - (a.plays || 0);
+                if (sortVal === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
+                if (sortVal === 'rating') return (b.rating || 0) - (a.rating || 0);
+                if (sortVal === 'title') return a.title.localeCompare(b.title);
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(game => {
+                const isFav = favorites.has(game.id);
+                const defaultImg = 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80';
+                const imageSrc = game.thumb || defaultImg;
+
+                return `
+                    <div class="bg-[#0a325c] border border-[#40a9FF]/30 rounded-2xl overflow-hidden shadow-xl hover:shadow-[#40a9FF]/20 hover:border-[#40a9FF] transition-all duration-300 flex flex-col group">
+                        
+                        <!-- Thumbnail Header -->
+                        <div class="relative h-44 overflow-hidden bg-[#03213d]">
+                            <img src="${imageSrc}" alt="${game.title}" 
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                onerror="this.src='${defaultImg}'">
+                            
+                            <!-- Overlay Gradient -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a325c] via-transparent to-black/40"></div>
+
+                            <!-- Category Badge -->
+                            <span class="absolute top-3 left-3 bg-[#0056A0]/90 border border-[#40a9FF]/50 text-[#40a9FF] text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-sm">
+                                ${game.category}
+                            </span>
+
+                            <!-- Favorite Button -->
+                            <button onclick="toggleFav('${game.id}', event)" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-sm flex items-center justify-center text-yellow-400 transition-transform active:scale-90">
+                                <i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                            </button>
+
+                            <!-- Play Button Overlay on Hover -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity duration-300">
+                                <button onclick="launchGame('${game.id}')" class="w-14 h-14 rounded-full gradient-accent flex items-center justify-center text-slate-950 text-xl font-bold shadow-2xl transform group-hover:scale-105 transition-transform">
+                                    <i class="fa-solid fa-play ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <div>
+                                <h3 class="font-bold text-base text-white line-clamp-1 group-hover:text-[#40a9FF] transition-colors">
+                                    ${game.title}
+                                </h3>
+                                <p class="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">
+                                    ${game.description || 'Sem descrição.'}
+                                </p>
+                            </div>
+
+                            <!-- Stats Footer -->
+                            <div class="pt-2 border-t border-[#40a9FF]/20 flex items-center justify-between text-xs text-slate-400">
+                                <div class="flex items-center gap-1 text-yellow-400 font-semibold">
+                                    <i class="fa-solid fa-star text-xs"></i>
+                                    <span>${game.rating || '4.8'}</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <i class="fa-solid fa-gamepad text-xs"></i>
+                                    <span>${game.plays || 0} jogadas</span>
+                                </div>
+                                <button onclick="launchGame('${game.id}')" class="gradient-accent text-slate-950 px-3 py-1.5 rounded-lg font-bold text-xs hover:opacity-90 transition-opacity">
+                                    JOGAR
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleSearch() {
+            renderGames();
+        }
+
+        function handleSearchMobile() {
+            renderGames();
+        }
+
+        function toggleFav(id, event) {
+            if (event) event.stopPropagation();
+            if (favorites.has(id)) {
+                favorites.delete(id);
+                alertToast('Removido dos favoritos');
+            } else {
+                favorites.add(id);
+                alertToast('Adicionado aos Favoritos!');
+            }
+            saveFavorites();
+            renderGames();
+        }
+
+        function openAddGameModal() {
+            document.getElementById('addGameModal').classList.remove('hidden');
+        }
+
+        function closeAddGameModal() {
+            document.getElementById('addGameModal').classList.add('hidden');
+            document.getElementById('addGameForm').reset();
+            toggleTypeInputs('iframe');
+        }
+
+        function toggleTypeInputs(type) {
+            const urlContainer = document.getElementById('urlContainer');
+            const codeContainer = document.getElementById('codeContainer');
+            const urlInput = document.getElementById('newGameUrl');
+
+            if (type === 'canvas') {
+                urlContainer.classList.add('hidden');
+                codeContainer.classList.remove('hidden');
+                urlInput.removeAttribute('required');
+            } else {
+                urlContainer.classList.remove('hidden');
+                codeContainer.classList.add('hidden');
+                urlInput.setAttribute('required', 'true');
+                
+                const label = document.getElementById('urlLabel');
+                if (type === 'external') {
+                    label.innerText = 'URL do Site/Jogo Externo *';
+                } else {
+                    label.innerText = 'URL do Iframe/Embed *';
+                }
+            }
+        }
+
+        function setPresetThumb(type) {
+            const thumbs = {
+                1: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&auto=format&fit=crop&q=80',
+                2: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&auto=format&fit=crop&q=80',
+                3: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80'
+            };
+            document.getElementById('newThumbUrl').value = thumbs[type] || '';
+        }
+
+        function handleSaveGame(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('newTitle').value.trim();
+            const category = document.getElementById('newCategory').value;
+            const gameTypeRadio = document.querySelector('input[name="gameType"]:checked').value;
+            const url = document.getElementById('newGameUrl').value.trim();
+            const code = document.getElementById('newGameCode').value.trim();
+            const thumb = document.getElementById('newThumbUrl').value.trim();
+            const description = document.getElementById('newDescription').value.trim();
+            const controls = document.getElementById('newControls').value.trim();
+
+            if (!title) {
+                alertToast("Por favor insira um título!", "error");
+                return;
+            }
+
+            const newGame = {
+                id: 'custom_' + Date.now(),
+                title: title,
+                category: category,
+                type: gameTypeRadio,
+                url: url,
+                code: code,
+                thumb: thumb || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80',
+                description: description || 'Jogo cadastrado no portal TRIUBUTA.',
+                controls: controls || 'Controles padrão no jogo.',
+                plays: 0,
+                rating: 5.0,
+                isNative: false,
+                createdAt: Date.now()
+            };
+
+            gamesList.unshift(newGame);
+            saveCustomGames();
+            closeAddGameModal();
+            renderGames();
+            alertToast("Jogo adicionado com sucesso ao TRIUBUTA!");
+        }
+
+        function launchGame(id) {
+            const game = gamesList.find(g => g.id === id);
+            if (!game) return;
+
+            activeGame = game;
+            game.plays = (game.plays || 0) + 1;
+            saveCustomGames();
+            updateStats();
+
+            // Populate side panel info
+            document.getElementById('activeGameTitle').innerText = game.title;
+            document.getElementById('activeGameCategory').innerText = game.category;
+            document.getElementById('activeGameRating').innerHTML = `<i class="fa-solid fa-star"></i> ${game.rating || 4.8}`;
+            document.getElementById('activeGamePlays').innerText = game.plays;
+            document.getElementById('activeGameControls').innerText = game.controls || 'Teclado / Mouse';
+            document.getElementById('activeGameDesc').innerText = game.description || 'Sem descrição.';
+
+            updateActiveFavIcon();
+
+            const container = document.getElementById('gameFrameContainer');
+            container.innerHTML = ''; // Clear existing frame
+
+            // Open Modal
+            document.getElementById('gamePlayerModal').classList.remove('hidden');
+
+            // Render game depending on type
+            if (game.isNative) {
+                renderNativeGame(game.type, container);
+            } else if (game.type === 'iframe') {
+                container.innerHTML = `<iframe src="${game.url}" class="w-full h-full border-0 rounded-xl" allowfullscreen allow="autoplay; gamepad"></iframe>`;
+            } else if (game.type === 'external') {
+                container.innerHTML = `
+                    <div class="text-center p-8 space-y-4">
+                        <i class="fa-solid fa-up-right-from-square text-5xl text-[#40a9FF]"></i>
+                        <h3 class="text-xl font-bold text-white">${game.title}</h3>
+                        <p class="text-slate-300 text-sm max-w-md">Este jogo é executado em um link externo. Clique no botão abaixo para abrir:</p>
+                        <a href="${game.url}" target="_blank" class="inline-block gradient-accent text-slate-950 font-bold px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-external-link"></i> Abrir Jogo Externo
+                        </a>
+                    </div>
+                `;
+            } else if (game.type === 'canvas') {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'w-full h-full border-0 rounded-xl bg-slate-900';
+                container.appendChild(iframe);
+                const doc = iframe.contentWindow.document;
+                doc.open();
+                doc.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <style>body { margin: 0; background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }</style>
+                    </head>
+                    <body>
+                        ${game.code}
+                    </body>
+                    </html>
+                `);
+                doc.close();
+            }
+
+            renderGames(); // Refresh count on grid
+        }
+
+        function closeGamePlayer() {
+            if (activeGameLoop) {
+                clearInterval(activeGameLoop);
+                activeGameLoop = null;
+            }
+            document.getElementById('gameFrameContainer').innerHTML = '';
+            document.getElementById('gamePlayerModal').classList.add('hidden');
+            activeGame = null;
+        }
+
+        function restartActiveGame() {
+            if (activeGame) {
+                launchGame(activeGame.id);
+            }
+        }
+
+        function toggleActiveFavorite() {
+            if (!activeGame) return;
+            toggleFav(activeGame.id);
+            updateActiveFavIcon();
+        }
+
+        function updateActiveFavIcon() {
+            if (!activeGame) return;
+            const icon = document.getElementById('activeFavIcon');
+            if (favorites.has(activeGame.id)) {
+                icon.className = 'fa-solid fa-star text-yellow-400';
+            } else {
+                icon.className = 'fa-regular fa-star text-slate-300';
+            }
+        }
+
+        function toggleFullscreen() {
+            const elem = document.getElementById('gameFrameContainer');
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => alertToast("Não foi possível ativar tela cheia", "error"));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function renderNativeGame(type, container) {
+            if (activeGameLoop) clearInterval(activeGameLoop);
+
+            if (type === 'native_snake') {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full h-full">
+                        <div class="mb-2 flex items-center justify-between w-full max-w-[400px] text-xs font-bold text-slate-300">
+                            <span>PONTUAÇÃO: <span id="snakeScore" class="text-[#7AC143]">0</span></span>
+                            <span>RECORD: <span id="snakeHigh" class="text-[#40a9FF]">0</span></span>
+                        </div>
+                        <canvas id="snakeCanvas" width="400" height="400" class="border-2 border-[#40a9FF] rounded-xl bg-[#03213d] shadow-2xl max-w-full max-h-[70vh]"></canvas>
+                        <div class="mt-3 grid grid-cols-3 gap-1 sm:hidden w-36">
+                            <div></div>
+                            <button onclick="changeSnakeDir('UP')" class="bg-[#0056A0] p-3 rounded-lg text-white font-bold">▲</button>
+                            <div></div>
+                            <button onclick="changeSnakeDir('LEFT')" class="bg-[#0056A0] p-3 rounded-lg text-white font-bold">◄</button>
+                            <button onclick="changeSnakeDir('DOWN')" class="bg-[#0056A0] p-3 rounded-lg text-white font-bold">▼</button>
+                            <button onclick="changeSnakeDir('RIGHT')" class="bg-[#0056A0] p-3 rounded-lg text-white font-bold">►</button>
+                        </div>
+                    </div>
+                `;
+
+                initSnakeEngine();
+            } else if (type === 'native_pong') {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full h-full">
+                        <div class="mb-2 text-xs font-bold text-slate-300 flex gap-6">
+                            <span>VOCÊ: <span id="pongUser" class="text-[#7AC143]">0</span></span>
+                            <span>IA: <span id="pongAi" class="text-red-400">0</span></span>
+                        </div>
+                        <canvas id="pongCanvas" width="500" height="350" class="border-2 border-[#40a9FF] rounded-xl bg-[#03213d] shadow-2xl max-w-full max-h-[70vh]"></canvas>
+                    </div>
+                `;
+                initPongEngine();
+            } else if (type === 'native_space') {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center w-full h-full">
+                        <div class="mb-2 text-xs font-bold text-slate-300">PONTOS: <span id="spaceScore" class="text-[#7AC143]">0</span></div>
+                        <canvas id="spaceCanvas" width="450" height="400" class="border-2 border-[#40a9FF] rounded-xl bg-slate-950 shadow-2xl max-w-full max-h-[70vh]"></canvas>
+                    </div>
+                `;
+                initSpaceEngine();
+            } else if (type === 'native_memory') {
+                initMemoryGame(container);
+            }
+        }
+
+        // --- SNAKE GAME ENGINE ---
+        let snakeDir = 'RIGHT';
+        function changeSnakeDir(dir) {
+            if (dir === 'UP' && snakeDir !== 'DOWN') snakeDir = 'UP';
+            if (dir === 'DOWN' && snakeDir !== 'UP') snakeDir = 'DOWN';
+            if (dir === 'LEFT' && snakeDir !== 'RIGHT') snakeDir = 'LEFT';
+            if (dir === 'RIGHT' && snakeDir !== 'LEFT') snakeDir = 'RIGHT';
+        }
+
+        function initSnakeEngine() {
+            const canvas = document.getElementById('snakeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const grid = 20;
+            let count = 0;
+            let score = 0;
+            let snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
+            let apple = {x: 300, y: 200};
+            snakeDir = 'RIGHT';
+
+            const keyHandler = (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'w') changeSnakeDir('UP');
+                if (e.key === 'ArrowDown' || e.key === 's') changeSnakeDir('DOWN');
+                if (e.key === 'ArrowLeft' || e.key === 'a') changeSnakeDir('LEFT');
+                if (e.key === 'ArrowRight' || e.key === 'd') changeSnakeDir('RIGHT');
+            };
+            window.addEventListener('keydown', keyHandler);
+
+            activeGameLoop = setInterval(() => {
+                // Clear
+                ctx.fillStyle = '#03213d';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Grid lines
+                ctx.strokeStyle = 'rgba(64, 169, 255, 0.08)';
+                for (let i = 0; i < canvas.width; i += grid) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+                }
+
+                // Move head
+                let head = {x: snake[0].x, y: snake[0].y};
+                if (snakeDir === 'RIGHT') head.x += grid;
+                if (snakeDir === 'LEFT') head.x -= grid;
+                if (snakeDir === 'UP') head.y -= grid;
+                if (snakeDir === 'DOWN') head.y += grid;
+
+                // Wall wrap or collision
+                if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                    // Reset game
+                    snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
+                    snakeDir = 'RIGHT';
+                    score = 0;
+                    document.getElementById('snakeScore').innerText = score;
+                    return;
+                }
+
+                // Self collision
+                for (let i = 0; i < snake.length; i++) {
+                    if (head.x === snake[i].x && head.y === snake[i].y) {
+                        snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
+                        snakeDir = 'RIGHT';
+                        score = 0;
+                        document.getElementById('snakeScore').innerText = score;
+                        return;
+                    }
+                }
+
+                snake.unshift(head);
+
+                // Eat apple
+                if (head.x === apple.x && head.y === apple.y) {
+                    score += 10;
+                    document.getElementById('snakeScore').innerText = score;
+                    apple.x = Math.floor(Math.random() * (canvas.width / grid)) * grid;
+                    apple.y = Math.floor(Math.random() * (canvas.height / grid)) * grid;
+                } else {
+                    snake.pop();
+                }
+
+                // Draw Apple
+                ctx.fillStyle = '#7AC143';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#7AC143';
+                ctx.fillRect(apple.x + 2, apple.y + 2, grid - 4, grid - 4);
+                ctx.shadowBlur = 0;
+
+                // Draw Snake
+                snake.forEach((segment, index) => {
+                    ctx.fillStyle = index === 0 ? '#40a9FF' : '#0056A0';
+                    ctx.fillRect(segment.x + 1, segment.y + 1, grid - 2, grid - 2);
+                });
+
+            }, 100);
+        }
+
+        // --- PONG GAME ENGINE ---
+        function initPongEngine() {
+            const canvas = document.getElementById('pongCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let userY = 120;
+            let aiY = 120;
+            const paddleH = 70;
+            const paddleW = 10;
+            let ballX = 250, ballY = 175;
+            let ballSpeedX = 4, ballSpeedY = 3;
+            let scoreUser = 0, scoreAi = 0;
+
+            const mouseMove = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                userY = e.clientY - rect.top - paddleH / 2;
+            };
+            canvas.addEventListener('mousemove', mouseMove);
+
+            activeGameLoop = setInterval(() => {
+                // Clear
+                ctx.fillStyle = '#03213d';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Move Ball
+                ballX += ballSpeedX;
+                ballY += ballSpeedY;
+
+                // Bounce top/bottom
+                if (ballY <= 0 || ballY >= canvas.height) ballSpeedY = -ballSpeedY;
+
+                // AI movement
+                if (aiY + paddleH / 2 < ballY - 10) aiY += 3;
+                else if (aiY + paddleH / 2 > ballY + 10) aiY -= 3;
+
+                // User collision
+                if (ballX <= paddleW + 10 && ballY >= userY && ballY <= userY + paddleH) {
+                    ballSpeedX = -ballSpeedX;
+                }
+                // AI collision
+                if (ballX >= canvas.width - paddleW - 10 && ballY >= aiY && ballY <= aiY + paddleH) {
+                    ballSpeedX = -ballSpeedX;
+                }
+
+                // Reset on Goal
+                if (ballX < 0) {
+                    scoreAi++;
+                    document.getElementById('pongAi').innerText = scoreAi;
+                    ballX = 250; ballY = 175; ballSpeedX = 4;
+                }
+                if (ballX > canvas.width) {
+                    scoreUser++;
+                    document.getElementById('pongUser').innerText = scoreUser;
+                    ballX = 250; ballY = 175; ballSpeedX = -4;
+                }
+
+                // Draw Net
+                ctx.strokeStyle = '#40a9FF';
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath(); ctx.moveTo(250, 0); ctx.lineTo(250, 350); ctx.stroke(); ctx.setLineDash([]);
+
+                // Draw Paddles & Ball
+                ctx.fillStyle = '#7AC143';
+                ctx.fillRect(10, userY, paddleW, paddleH);
+
+                ctx.fillStyle = '#f87171';
+                ctx.fillRect(canvas.width - paddleW - 10, aiY, paddleW, paddleH);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, 7, 0, Math.PI * 2);
+                ctx.fill();
+
+            }, 1000 / 60);
+        }
+
+        // --- SPACE DEFENDER ENGINE ---
+        function initSpaceEngine() {
+            const canvas = document.getElementById('spaceCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            let playerX = 200;
+            let bullets = [];
+            let enemies = [];
+            let score = 0;
+
+            const keyHandler = (e) => {
+                if (e.key === 'ArrowLeft') playerX -= 20;
+                if (e.key === 'ArrowRight') playerX += 20;
+                if (e.key === ' ' || e.key === 'ArrowUp') {
+                    bullets.push({x: playerX + 15, y: 360});
+                }
+            };
+            window.addEventListener('keydown', keyHandler);
+
+            activeGameLoop = setInterval(() => {
+                ctx.fillStyle = '#020b14';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Spawn Enemies
+                if (Math.random() < 0.05) {
+                    enemies.push({x: Math.random() * (canvas.width - 30), y: -20});
+                }
+
+                // Update Bullets
+                bullets.forEach((b, i) => {
+                    b.y -= 7;
+                    if (b.y < 0) bullets.splice(i, 1);
+                });
+
+                // Update Enemies
+                enemies.forEach((e, ei) => {
+                    e.y += 2;
+                    // Collision with Bullets
+                    bullets.forEach((b, bi) => {
+                        if (Math.abs(b.x - (e.x + 15)) < 15 && Math.abs(b.y - e.y) < 15) {
+                            enemies.splice(ei, 1);
+                            bullets.splice(bi, 1);
+                            score += 20;
+                            document.getElementById('spaceScore').innerText = score;
+                        }
+                    });
+                });
+
+                // Draw Player
+                ctx.fillStyle = '#7AC143';
+                ctx.beginPath();
+                ctx.moveTo(playerX + 15, 360);
+                ctx.lineTo(playerX, 390);
+                ctx.lineTo(playerX + 30, 390);
+                ctx.fill();
+
+                // Draw Bullets
+                ctx.fillStyle = '#40a9FF';
+                bullets.forEach(b => ctx.fillRect(b.x, b.y, 3, 10));
+
+                // Draw Enemies
+                ctx.fillStyle = '#ef4444';
+                enemies.forEach(e => ctx.fillRect(e.x, e.y, 25, 25));
+
+            }, 1000 / 60);
+        }
+
+        // --- MEMORY MATRIX ENGINE ---
+        function initMemoryGame(container) {
+            const icons = ['fa-gamepad', 'fa-ghost', 'fa-bolt', 'fa-crown', 'fa-rocket', 'fa-[#7AC143]', 'fa-shield', 'fa-gem'];
+            let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
+            let flipped = [];
+            let matched = 0;
+
+            container.innerHTML = `
+                <div class="p-4 flex flex-col items-center justify-center">
+                    <h3 class="text-white font-bold mb-4 text-sm">Combine os pares correspondentes</h3>
+                    <div id="memoryGrid" class="grid grid-cols-4 gap-3 max-w-sm"></div>
+                </div>
+            `;
+
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = deck.map((icon, idx) => `
+                <div onclick="flipCard(${idx}, '${icon}')" id="card-${idx}" 
+                    class="w-16 h-16 bg-[#0056A0] border-2 border-[#40a9FF] rounded-xl flex items-center justify-center text-2xl text-transparent cursor-pointer transition-all duration-300 transform active:scale-95 shadow-md">
+                    <i class="fa-solid ${icon}"></i>
+                </div>
+            `).join('');
+
+            window.flipCard = (idx, icon) => {
+                const el = document.getElementById(`card-${idx}`);
+                if (flipped.length < 2 && !el.classList.contains('matched') && !flipped.some(f => f.idx === idx)) {
+                    el.classList.remove('text-transparent');
+                    el.classList.add('text-[#7AC143]', 'bg-[#03213d]', 'scale-105');
+                    flipped.push({idx, icon, el});
+
+                    if (flipped.length === 2) {
+                        if (flipped[0].icon === flipped[1].icon) {
+                            flipped.forEach(f => f.el.classList.add('matched', 'border-[#7AC143]'));
+                            flipped = [];
+                            matched += 2;
+                            if (matched === deck.length) {
+                                setTimeout(() => alertToast('Parabéns! Você venceu o Jogo da Memória!'), 300);
+                            }
+                        } else {
+                            setTimeout(() => {
+                                flipped.forEach(f => {
+                                    f.el.classList.add('text-transparent');
+                                    f.el.classList.remove('text-[#7AC143]', 'bg-[#03213d]', 'scale-105');
+                                });
+                                flipped = [];
+                            }, 800);
+                        }
+                    }
+                }
+            };
+        }
+
+        function alertToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-600' : 'bg-[#7AC143] text-slate-950';
+
+            toast.className = `${bgClass} font-bold text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> <span>${msg}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
